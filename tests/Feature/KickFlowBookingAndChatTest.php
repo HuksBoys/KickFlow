@@ -147,4 +147,75 @@ class KickFlowBookingAndChatTest extends TestCase
             'role' => 'assistant',
         ]);
     }
+
+    /**
+     * Test AI Chat can create a booking directly via conversational command.
+     */
+    public function test_ai_chat_can_create_booking_directly_via_chat(): void
+    {
+        $user = User::factory()->create();
+        $field = Field::factory()->create([
+            'name' => 'Garuda Sport Futsal',
+            'price_per_hour' => 150000,
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($user)->postJson('/api/chat', [
+            'message' => 'Pesan lapangan Garuda Sport Futsal besok jam 19:00 selama 2 jam',
+            'session_id' => 'test_session_booking_1',
+        ]);
+
+        $response->assertStatus(200);
+        $this->assertEquals('create_booking', $response->json('function_called'));
+        $this->assertStringContainsString('Pemesanan lapangan futsal berhasil dibuat', $response->json('reply'));
+
+        $tomorrow = now()->addDay()->format('Y-m-d');
+        $this->assertDatabaseHas('bookings', [
+            'user_id' => $user->id,
+            'field_id' => $field->id,
+            'start_time' => '19:00',
+            'end_time' => '21:00',
+            'duration_hours' => 2,
+            'total_price' => 300000,
+            'status' => 'pending',
+        ]);
+        $booking = Booking::where('user_id', $user->id)->first();
+        $this->assertNotNull($booking);
+        $this->assertEquals($tomorrow, $booking->booking_date->format('Y-m-d'));
+    }
+
+    /**
+     * Test AI Chat can cancel a booking directly via conversational command.
+     */
+    public function test_ai_chat_can_cancel_booking_directly_via_chat(): void
+    {
+        $user = User::factory()->create();
+        $field = Field::factory()->create([
+            'name' => 'Arena Merdeka',
+            'is_active' => true,
+        ]);
+
+        $booking = Booking::create([
+            'user_id' => $user->id,
+            'field_id' => $field->id,
+            'booking_date' => now()->addDays(2)->format('Y-m-d'),
+            'start_time' => '17:00',
+            'end_time' => '18:00',
+            'duration_hours' => 1,
+            'total_price' => 100000,
+            'status' => 'pending',
+            'payment_status' => 'unpaid',
+        ]);
+
+        $response = $this->actingAs($user)->postJson('/api/chat', [
+            'message' => "Tolong batalkan booking #KF-{$booking->id}",
+            'session_id' => 'test_session_cancel_1',
+        ]);
+
+        $response->assertStatus(200);
+        $this->assertEquals('cancel_booking', $response->json('function_called'));
+        $this->assertStringContainsString('berhasil dibatalkan', $response->json('reply'));
+
+        $this->assertEquals('cancelled', $booking->fresh()->status);
+    }
 }

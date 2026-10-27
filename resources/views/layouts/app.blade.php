@@ -322,11 +322,14 @@
                 <button @click="sendQuick('Cek lapangan yang tersedia')" class="px-2.5 py-1 bg-[#313244] border border-[#45475a] text-[#a6e3a1] rounded-full hover:bg-[#45475a] transition">
                     🏟️ Lapangan Tersedia
                 </button>
+                <button @click="sendQuick('Pesan lapangan Garuda Sport besok jam 19:00 selama 2 jam')" class="px-2.5 py-1 bg-[#313244] border border-[#45475a] text-[#94e2d5] rounded-full hover:bg-[#45475a] transition font-medium">
+                    ⚡ Booking via AI
+                </button>
                 <button @click="sendQuick('Berapa harga sewa per jam?')" class="px-2.5 py-1 bg-[#313244] border border-[#45475a] text-[#fab387] rounded-full hover:bg-[#45475a] transition">
                     💰 Info Harga
                 </button>
-                <button @click="sendQuick('Bagaimana cara memesan lapangan?')" class="px-2.5 py-1 bg-[#313244] border border-[#45475a] text-[#89b4fa] rounded-full hover:bg-[#45475a] transition">
-                    📝 Cara Booking
+                <button @click="sendQuick('Cek status booking saya')" class="px-2.5 py-1 bg-[#313244] border border-[#45475a] text-[#89b4fa] rounded-full hover:bg-[#45475a] transition">
+                    📋 Cek Booking
                 </button>
             </div>
 
@@ -339,7 +342,7 @@
                     </div>
                     <div class="bg-[#313244] border border-[#45475a] rounded-2xl rounded-tl-none p-3 shadow-sm text-[#cdd6f4] max-w-[85%]">
                         <p class="font-semibold text-[#a6e3a1] text-xs mb-1">KickFlow Assistant</p>
-                        Halo! Saya asisten AI KickFlow siap membantu Anda mencari lapangan futsal, cek jadwal kosong, dan panduan reservasi. Mau main kapan? ⚽
+                        Halo! Saya KickFlow Assistant. Saya bisa membantu Anda mencari lapangan, cek jadwal kosong, serta **MEMBUAT BOOKING** atau **MEMBATALKAN PEMESANAN** langsung dari percakapan ini! Mau main kapan? ⚽
                     </div>
                 </div>
 
