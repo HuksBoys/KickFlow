@@ -202,7 +202,7 @@ Aplikasi KickFlow siap di-deploy ke **Vercel Serverless Platform** menggunakan r
 
 ### Arsitektur Serverless Vercel untuk KickFlow:
 1. **Entry Point Serverless (`api/index.php`)**: Mempersiapkan subdirektori `/tmp/storage/...` dan `/tmp/bootstrap/cache` secara otomatis saat cold start agar Blade view compilation, session, dan logging tidak mengalami error file system read-only, serta menormalkan `SCRIPT_NAME` untuk routing Laravel.
-2. **Konfigurasi `vercel.json`**: Menjalankan `npm run build` otomatis untuk aset frontend Vite/Tailwind, mengarahkan rute statis `/build/(.*)` ke `/public/build/$1`, dan mem-forward semua rute aplikasi ke runtime PHP `api/index.php` (tanpa `outputDirectory: public` agar `public/index.php` tidak disajikan sebagai unduhan statis mentah).
+2. **Konfigurasi `vercel.json`**: Menjalankan `npm run build` otomatis untuk aset frontend Vite/Tailwind, menetapkan `outputDirectory: "public"`, mengarahkan rute statis `/build/(.*)` ke `/build/$1`, dan mem-forward semua rute aplikasi `/(.*)` langsung ke runtime PHP `api/index.php` (tanpa `handle: filesystem` agar `public/index.php` tidak tertangkap sebagai file unduhan statis).
 3. **Filter `.vercelignore`**: Mencegah folder lokal `vendor/`, `node_modules/`, dan file kredensial `.env` ter-upload langsung ke bundle serverless, menjaga ukuran fungsi di bawah batas limit Vercel.
 
 ### Langkah-Langkah Deploy:
@@ -224,9 +224,10 @@ git push origin master
 
 #### 3. Import / Pengaturan di Vercel Dashboard
 1. Masuk ke [Vercel Dashboard](https://vercel.com/dashboard) dan buka project **KickFlow**.
-2. **PENTING (Pengaturan Build & Output)**:
+2. **PENTING (Pengaturan Framework & Build)**:
    - Masuk ke **Settings** -> **General** -> **Build & Development Settings**.
-   - Pastikan opsi **Output Directory** dalam keadaan **OFF / Disabled** (jangan di-override ke `public`).
+   - Pada bagian **Framework Preset**, ubah dari **Vite** menjadi **Other** (agar Vercel tidak mencari folder `dist`).
+   - Pada bagian **Output Directory**, biarkan sesuai `vercel.json` (terkonfigurasi otomatis ke `public`).
 3. Di bagian **Environment Variables** (Settings -> Environment Variables), pastikan telah diisi:
    - `APP_NAME` : `KickFlow`
    - `APP_ENV` : `production`
@@ -349,7 +350,8 @@ KickFlow/
 | 2026-10-27 20:25 / v0.5.0 | [UI-Agent] | Transformasi Tema Desain Catppuccin | Redesain visual menyeluruh seluruh antarmuka (UI) dan Floating Chatbot Widget ke gaya warna modern "Catppuccin Mocha" (Base `#1e1e2e`, Mantle `#181825`, Crust `#11111b`, Surface0 `#313244`, Green `#a6e3a1`, Mauve `#cba6f7`, Text `#cdd6f4`) | `resources/css/app.css`, `resources/views/layouts/app.blade.php`, `resources/views/welcome.blade.php`, `resources/views/fields/*`, `resources/views/bookings/*`, `resources/views/dashboard.blade.php`, `resources/views/auth/*` |
 | 2026-10-27 21:15 / v0.6.0 | [AI-Agent] | Aksi Perubahan & Mutasi AI Chatbot (Write Tools) | Implementasi tool mutasi data Gemini Function Calling: `create_booking` (reservasi langsung via pesan percakapan dengan validasi anti double-booking real-time) dan `cancel_booking` (pembatalan booking valid dengan otorisasi pengguna), didukung automated test suite lengkap (8 passed, 31 assertions) | `app/Services/KickFlowAiService.php`, `resources/views/layouts/app.blade.php`, `tests/Feature/KickFlowBookingAndChatTest.php` |
 | 2026-10-29 18:40 / v0.7.0 | [DevOps-Agent] | Konfigurasi Deployment Vercel Serverless | Konfigurasi arsitektur deployment serverless Vercel: runtime `vercel-php@0.9.0` (PHP 8.5), Vite asset build pipeline, handling auto-create direktori penyimpanan `/tmp/storage/...` & `/tmp/bootstrap/cache`, rules `.vercelignore`, dan panduan integrasi cloud MySQL | `vercel.json`, `api/index.php`, `.vercelignore`, `README.md` |
-| 2026-10-29 19:30 / v0.7.1 | [DevOps-Agent] | Perbaikan Unduhan Statis Vercel & Normalisasi Rute | Perbaikan masalah file index.php terunduh mentah: menghapus outputDirectory: public & handle: filesystem di vercel.json, menambahkan normalisasi SCRIPT_NAME di api/index.php, dan rute eksplisit aset /build/(.*) | `vercel.json`, `api/index.php`, `README.md` |
+| 2026-10-29 19:30 / v0.7.1 | [DevOps-Agent] | Perbaikan Unduhan Statis Vercel & Normalisasi Rute | Perbaikan masalah file index.php terunduh mentah: menghapus handle: filesystem, menambahkan normalisasi SCRIPT_NAME di api/index.php, dan rute eksplisit aset /build/(.*) | `vercel.json`, `api/index.php`, `README.md` |
+| 2026-10-29 19:40 / v0.7.2 | [DevOps-Agent] | Resolusi STATIC_BUILD_NO_OUT_DIR (dist) | Menetapkan outputDirectory: "public" di vercel.json untuk mengatasi pencarian folder "dist" oleh preset build Vite Vercel, serta panduan penggantian Framework Preset ke "Other" | `vercel.json`, `README.md` |
 
 ---
 
