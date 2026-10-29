@@ -201,8 +201,8 @@ GEMINI_API_KEY=your_gemini_api_key_here
 Aplikasi KickFlow siap di-deploy ke **Vercel Serverless Platform** menggunakan runtime komunitas `vercel-php@0.9.0` (PHP 8.5) dan Vite asset pipeline.
 
 ### Arsitektur Serverless Vercel untuk KickFlow:
-1. **Entry Point Serverless (`api/index.php`)**: Mempersiapkan subdirektori `/tmp/storage/...` dan `/tmp/bootstrap/cache` secara otomatis saat cold start agar Blade view compilation, session, dan logging tidak mengalami error file system read-only.
-2. **Konfigurasi `vercel.json`**: Menjalankan `npm run build` otomatis untuk aset frontend Vite/Tailwind, menyajikan static asset via `{ "handle": "filesystem" }`, dan mengarahkan semua route aplikasi ke `api/index.php`.
+1. **Entry Point Serverless (`api/index.php`)**: Mempersiapkan subdirektori `/tmp/storage/...` dan `/tmp/bootstrap/cache` secara otomatis saat cold start agar Blade view compilation, session, dan logging tidak mengalami error file system read-only, serta menormalkan `SCRIPT_NAME` untuk routing Laravel.
+2. **Konfigurasi `vercel.json`**: Menjalankan `npm run build` otomatis untuk aset frontend Vite/Tailwind, mengarahkan rute statis `/build/(.*)` ke `/public/build/$1`, dan mem-forward semua rute aplikasi ke runtime PHP `api/index.php` (tanpa `outputDirectory: public` agar `public/index.php` tidak disajikan sebagai unduhan statis mentah).
 3. **Filter `.vercelignore`**: Mencegah folder lokal `vendor/`, `node_modules/`, dan file kredensial `.env` ter-upload langsung ke bundle serverless, menjaga ukuran fungsi di bawah batas limit Vercel.
 
 ### Langkah-Langkah Deploy:
@@ -218,14 +218,16 @@ DB_HOST=your-remote-host.com DB_PORT=3306 DB_DATABASE=your_db DB_USERNAME=your_u
 #### 2. Push Kode ke Repository (GitHub/GitLab)
 ```bash
 git add .
-git commit -m "chore: configure Vercel serverless deployment"
+git commit -m "fix(vercel): resolve index.php static download issue by refining routing"
 git push origin master
 ```
 
-#### 3. Import ke Vercel
-1. Masuk ke [Vercel Dashboard](https://vercel.com/dashboard) dan klik **"Add New Project"**.
-2. Pilih repository **KickFlow**.
-3. Di bagian **Environment Variables**, tambahkan:
+#### 3. Import / Pengaturan di Vercel Dashboard
+1. Masuk ke [Vercel Dashboard](https://vercel.com/dashboard) dan buka project **KickFlow**.
+2. **PENTING (Pengaturan Build & Output)**:
+   - Masuk ke **Settings** -> **General** -> **Build & Development Settings**.
+   - Pastikan opsi **Output Directory** dalam keadaan **OFF / Disabled** (jangan di-override ke `public`).
+3. Di bagian **Environment Variables** (Settings -> Environment Variables), pastikan telah diisi:
    - `APP_NAME` : `KickFlow`
    - `APP_ENV` : `production`
    - `APP_DEBUG` : `false`
@@ -238,7 +240,7 @@ git push origin master
    - `DB_USERNAME` : Username database
    - `DB_PASSWORD` : Password database
    - `GEMINI_API_KEY` : API Key Google Gemini AI Anda
-4. Klik **Deploy** dan tunggu proses build selesai.
+4. Lakukan **Redeploy** (Deployments -> titik tiga (...) pada deployment terbaru -> **Redeploy**).
 
 ---
 
@@ -347,6 +349,7 @@ KickFlow/
 | 2026-10-27 20:25 / v0.5.0 | [UI-Agent] | Transformasi Tema Desain Catppuccin | Redesain visual menyeluruh seluruh antarmuka (UI) dan Floating Chatbot Widget ke gaya warna modern "Catppuccin Mocha" (Base `#1e1e2e`, Mantle `#181825`, Crust `#11111b`, Surface0 `#313244`, Green `#a6e3a1`, Mauve `#cba6f7`, Text `#cdd6f4`) | `resources/css/app.css`, `resources/views/layouts/app.blade.php`, `resources/views/welcome.blade.php`, `resources/views/fields/*`, `resources/views/bookings/*`, `resources/views/dashboard.blade.php`, `resources/views/auth/*` |
 | 2026-10-27 21:15 / v0.6.0 | [AI-Agent] | Aksi Perubahan & Mutasi AI Chatbot (Write Tools) | Implementasi tool mutasi data Gemini Function Calling: `create_booking` (reservasi langsung via pesan percakapan dengan validasi anti double-booking real-time) dan `cancel_booking` (pembatalan booking valid dengan otorisasi pengguna), didukung automated test suite lengkap (8 passed, 31 assertions) | `app/Services/KickFlowAiService.php`, `resources/views/layouts/app.blade.php`, `tests/Feature/KickFlowBookingAndChatTest.php` |
 | 2026-10-29 18:40 / v0.7.0 | [DevOps-Agent] | Konfigurasi Deployment Vercel Serverless | Konfigurasi arsitektur deployment serverless Vercel: runtime `vercel-php@0.9.0` (PHP 8.5), Vite asset build pipeline, handling auto-create direktori penyimpanan `/tmp/storage/...` & `/tmp/bootstrap/cache`, rules `.vercelignore`, dan panduan integrasi cloud MySQL | `vercel.json`, `api/index.php`, `.vercelignore`, `README.md` |
+| 2026-10-29 19:30 / v0.7.1 | [DevOps-Agent] | Perbaikan Unduhan Statis Vercel & Normalisasi Rute | Perbaikan masalah file index.php terunduh mentah: menghapus outputDirectory: public & handle: filesystem di vercel.json, menambahkan normalisasi SCRIPT_NAME di api/index.php, dan rute eksplisit aset /build/(.*) | `vercel.json`, `api/index.php`, `README.md` |
 
 ---
 

@@ -19,7 +19,10 @@ foreach ($subDirs as $dir) {
     }
 }
 
-// 2. Point Laravel storage & cache environment variables to /tmp
+// 2. Normalize server environment variables for Laravel routing
+$_SERVER['SCRIPT_NAME'] = '/index.php';
+
+// 3. Point Laravel storage & cache environment variables to /tmp
 $_ENV['LARAVEL_STORAGE_PATH'] = $storageDir;
 $_SERVER['LARAVEL_STORAGE_PATH'] = $storageDir;
 $_ENV['APP_STORAGE'] = $storageDir;
@@ -27,5 +30,5 @@ $_SERVER['APP_STORAGE'] = $storageDir;
 $_ENV['VIEW_COMPILED_PATH'] = $storageDir.'/framework/views';
 $_SERVER['VIEW_COMPILED_PATH'] = $storageDir.'/framework/views';
 
-// 3. Forward request to Laravel public/index.php
+// 4. Forward request to Laravel public/index.php
 require __DIR__.'/../public/index.php';
