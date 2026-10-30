@@ -14,12 +14,18 @@
                 Pantau performa reservasi lapangan, pendapatan platform, dan status operasional real-time.
             </p>
         </div>
-        <div class="flex gap-2">
-            <a href="{{ route('fields.index') }}" class="px-4 py-2 bg-[#313244] hover:bg-[#45475a] border border-[#45475a] text-[#cdd6f4] text-xs font-semibold rounded-xl transition">
-                🏟️ Lihat Lapangan
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ route('admin.fields.create') }}" class="px-4 py-2 bg-[#a6e3a1] hover:bg-[#94e2d5] text-[#11111b] text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                ➕ Tambah Lapangan
             </a>
-            <a href="{{ route('home') }}" class="px-4 py-2 bg-[#a6e3a1] hover:bg-[#94e2d5] text-[#11111b] text-xs font-bold rounded-xl transition">
-                ⚽ Halaman Depan
+            <a href="{{ route('admin.cashier.index') }}" class="px-4 py-2 bg-[#89b4fa] hover:bg-[#74c7ec] text-[#11111b] text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                ⚡ Kasir / Konfirmasi
+            </a>
+            <a href="{{ route('admin.fields.index') }}" class="px-4 py-2 bg-[#313244] hover:bg-[#45475a] border border-[#45475a] text-[#cdd6f4] text-xs font-semibold rounded-xl transition">
+                🏟️ Kelola Lapangan
+            </a>
+            <a href="{{ route('home') }}" class="px-4 py-2 bg-[#181825] hover:bg-[#313244] border border-[#45475a] text-[#a6adc8] text-xs font-semibold rounded-xl transition">
+                ⚽ Depan
             </a>
         </div>
     </div>
@@ -55,28 +61,28 @@
         </div>
 
         <!-- Card 3 -->
-        <div class="bg-[#181825] rounded-3xl p-6 border border-[#313244] shadow-sm flex items-center gap-4">
-            <div class="w-14 h-14 rounded-2xl bg-[#cba6f7]/15 text-[#cba6f7] border border-[#cba6f7]/30 flex items-center justify-center text-2xl flex-shrink-0">
+        <a href="{{ route('admin.fields.index') }}" class="bg-[#181825] hover:bg-[#313244]/50 rounded-3xl p-6 border border-[#313244] shadow-sm flex items-center gap-4 transition group">
+            <div class="w-14 h-14 rounded-2xl bg-[#cba6f7]/15 text-[#cba6f7] border border-[#cba6f7]/30 flex items-center justify-center text-2xl flex-shrink-0 group-hover:scale-105 transition">
                 🏟️
             </div>
             <div>
                 <span class="text-xs font-bold uppercase text-[#a6adc8] tracking-wider">Lapangan Aktif</span>
                 <div class="text-2xl font-extrabold text-[#cba6f7] mt-0.5">{{ $activeFields }}</div>
-                <span class="text-[11px] text-[#6c7086]">Siap menerima pesanan</span>
+                <span class="text-[11px] text-[#6c7086] group-hover:text-[#cba6f7] transition">Kelola lapangan →</span>
             </div>
-        </div>
+        </a>
 
         <!-- Card 4 -->
-        <div class="bg-[#181825] rounded-3xl p-6 border border-[#313244] shadow-sm flex items-center gap-4">
-            <div class="w-14 h-14 rounded-2xl bg-[#fab387]/15 text-[#fab387] border border-[#fab387]/30 flex items-center justify-center text-2xl flex-shrink-0">
+        <a href="{{ route('admin.cashier.index', ['status' => 'pending']) }}" class="bg-[#181825] hover:bg-[#313244]/50 rounded-3xl p-6 border border-[#313244] shadow-sm flex items-center gap-4 transition group">
+            <div class="w-14 h-14 rounded-2xl bg-[#fab387]/15 text-[#fab387] border border-[#fab387]/30 flex items-center justify-center text-2xl flex-shrink-0 group-hover:scale-105 transition">
                 ⏳
             </div>
             <div>
                 <span class="text-xs font-bold uppercase text-[#a6adc8] tracking-wider">Perlu Konfirmasi</span>
                 <div class="text-2xl font-extrabold text-[#fab387] mt-0.5">{{ $pendingBookings }}</div>
-                <span class="text-[11px] text-[#6c7086]">Pemesanan pending</span>
+                <span class="text-[11px] text-[#fab387] group-hover:underline transition">Buka kasir konfirmasi →</span>
             </div>
-        </div>
+        </a>
     </div>
 
     <!-- Recent Bookings Table -->
@@ -86,6 +92,9 @@
                 <h3 class="text-lg font-bold text-[#cdd6f4]">10 Pemesanan Terbaru</h3>
                 <p class="text-xs text-[#a6adc8]">Daftar transaksi booking paling mutakhir di sistem KickFlow</p>
             </div>
+            <a href="{{ route('admin.cashier.index') }}" class="px-3.5 py-1.5 rounded-xl bg-[#313244] hover:bg-[#45475a] text-[#89b4fa] text-xs font-semibold border border-[#45475a] transition flex items-center gap-1.5">
+                <span>⚡</span> Buka Semua di Kasir →
+            </a>
         </div>
 
         <div class="overflow-x-auto">
@@ -99,6 +108,7 @@
                         <th class="px-6 py-4">Jam</th>
                         <th class="px-6 py-4">Total Biaya</th>
                         <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#313244]">
@@ -142,10 +152,15 @@
                                     </span>
                                 @endif
                             </td>
+                            <td class="px-6 py-4 text-right">
+                                <a href="{{ route('admin.cashier.show', $booking) }}" class="px-3 py-1.5 rounded-xl bg-[#313244] hover:bg-[#89b4fa] hover:text-[#11111b] border border-[#45475a] text-xs font-semibold text-[#89b4fa] transition">
+                                    Proses di Kasir
+                                </a>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-12 text-center text-[#6c7086]">
+                            <td colspan="8" class="px-6 py-12 text-center text-[#6c7086]">
                                 Belum ada data pemesanan yang tercatat.
                             </td>
                         </tr>

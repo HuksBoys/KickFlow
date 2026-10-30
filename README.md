@@ -298,10 +298,9 @@ KickFlow/
 4. Anda akan diarahkan ke **Dashboard Admin**
 
 **Fitur Admin:**
-- Kelola data lapangan futsal (tambah, edit, hapus)
-- Lihat dan kelola semua booking yang masuk
-- Konfirmasi pembayaran dari customer
-- Melihat statistik dan laporan platform
+- **Manajemen Lapangan (Tambah & Kelola Lapangan):** Tambah lapangan baru dengan upload foto, penentuan tarif per jam, tipe (indoor/outdoor), fasilitas, ubah data, dan toggle status aktif/nonaktif.
+- **Kasir & Konfirmasi Pesanan (Point of Sale):** Antrean kasir terpadu untuk memverifikasi pesanan pending, konfirmasi reservasi, terima pembayaran lunas, penyelesaian sewa, pembatalan jadwal, filter multi-status, serta cetak struk nota resmi.
+- **Statistik & Monitoring:** Pantau booking hari ini, estimasi pendapatan bulanan, pesanan yang perlu tindakan cepat, dan 10 aktivitas transaksi terbaru.
 
 ---
 
@@ -352,6 +351,7 @@ KickFlow/
 | 2026-10-29 18:40 / v0.7.0 | [DevOps-Agent] | Konfigurasi Deployment Vercel Serverless | Konfigurasi arsitektur deployment serverless Vercel: runtime `vercel-php@0.9.0` (PHP 8.5), Vite asset build pipeline, handling auto-create direktori penyimpanan `/tmp/storage/...` & `/tmp/bootstrap/cache`, rules `.vercelignore`, dan panduan integrasi cloud MySQL | `vercel.json`, `api/index.php`, `.vercelignore`, `README.md` |
 | 2026-10-29 19:30 / v0.7.1 | [DevOps-Agent] | Perbaikan Unduhan Statis Vercel & Normalisasi Rute | Perbaikan masalah file index.php terunduh mentah: menghapus handle: filesystem, menambahkan normalisasi SCRIPT_NAME di api/index.php, dan rute eksplisit aset /build/(.*) | `vercel.json`, `api/index.php`, `README.md` |
 | 2026-10-29 19:40 / v0.7.2 | [DevOps-Agent] | Resolusi STATIC_BUILD_NO_OUT_DIR (dist) | Menetapkan outputDirectory: "public" di vercel.json untuk mengatasi pencarian folder "dist" oleh preset build Vite Vercel, serta panduan penggantian Framework Preset ke "Other" | `vercel.json`, `README.md` |
+| 2026-10-30 15:10 / v0.8.0 | [Admin-Agent] | Fitur Tambah Lapangan & Kasir (Konfirmasi Pesanan) | Implementasi modul admin menyeluruh: Manajemen Lapangan (tambah lapangan baru, upload foto, edit, hapus, toggle status) dan Modul Kasir (konfirmasi pesanan pending, terima pembayaran lunas, penyelesaian booking, pembatalan, cetak struk nota, filter status multi-kriteria), didukung middleware `EnsureUserIsAdmin` serta automated test suite lengkap (27 passed, 94 assertions) | `app/Http/Controllers/Admin/FieldController.php`, `app/Http/Controllers/Admin/CashierController.php`, `app/Http/Middleware/EnsureUserIsAdmin.php`, `app/Http/Requests/Admin/*`, `resources/views/admin/*`, `resources/views/layouts/app.blade.php`, `resources/views/dashboard.blade.php`, `tests/Feature/AdminFieldManagementTest.php`, `tests/Feature/AdminCashierTest.php`, `README.md` |
 
 ---
 

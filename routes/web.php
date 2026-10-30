@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\CashierController;
+use App\Http\Controllers\Admin\FieldController as AdminFieldController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -42,6 +44,26 @@ Route::middleware('auth')->group(function () {
     Route::patch('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+});
+
+// Admin routes (auth + admin role)
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Field Management (Tambah Lapangan)
+    Route::get('/fields', [AdminFieldController::class, 'index'])->name('fields.index');
+    Route::get('/fields/create', [AdminFieldController::class, 'create'])->name('fields.create');
+    Route::post('/fields', [AdminFieldController::class, 'store'])->name('fields.store');
+    Route::get('/fields/{field}/edit', [AdminFieldController::class, 'edit'])->name('fields.edit');
+    Route::put('/fields/{field}', [AdminFieldController::class, 'update'])->name('fields.update');
+    Route::delete('/fields/{field}', [AdminFieldController::class, 'destroy'])->name('fields.destroy');
+    Route::patch('/fields/{field}/toggle-status', [AdminFieldController::class, 'toggleStatus'])->name('fields.toggle-status');
+
+    // Cashier (Kasir - Konfirmasi Pesanan)
+    Route::get('/cashier', [CashierController::class, 'index'])->name('cashier.index');
+    Route::get('/cashier/{booking}', [CashierController::class, 'show'])->name('cashier.show');
+    Route::patch('/cashier/{booking}/confirm', [CashierController::class, 'confirm'])->name('cashier.confirm');
+    Route::patch('/cashier/{booking}/mark-paid', [CashierController::class, 'markPaid'])->name('cashier.mark-paid');
+    Route::patch('/cashier/{booking}/complete', [CashierController::class, 'complete'])->name('cashier.complete');
+    Route::patch('/cashier/{booking}/cancel', [CashierController::class, 'cancel'])->name('cashier.cancel');
 });
 
 // API routes

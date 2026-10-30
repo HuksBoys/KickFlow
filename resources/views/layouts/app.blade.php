@@ -91,7 +91,13 @@
                             </a>
                             @if(auth()->user()->role === 'admin')
                                 <a href="{{ route('dashboard') }}" class="px-3.5 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('dashboard') ? 'bg-[#313244] text-[#cba6f7]' : 'text-[#bac2de] hover:text-[#cba6f7] hover:bg-[#313244]/50' }} transition">
-                                    Dashboard Admin
+                                    Dashboard
+                                </a>
+                                <a href="{{ route('admin.fields.index') }}" class="px-3.5 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('admin.fields.*') ? 'bg-[#313244] text-[#a6e3a1]' : 'text-[#bac2de] hover:text-[#a6e3a1] hover:bg-[#313244]/50' }} transition">
+                                    Kelola Lapangan
+                                </a>
+                                <a href="{{ route('admin.cashier.index') }}" class="px-3.5 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('admin.cashier.*') ? 'bg-[#313244] text-[#89b4fa]' : 'text-[#bac2de] hover:text-[#89b4fa] hover:bg-[#313244]/50' }} transition">
+                                    Kasir
                                 </a>
                             @endif
                         @endauth
@@ -125,6 +131,8 @@
                             <div x-show="userMenu" @click.outside="userMenu = false" x-transition class="absolute right-0 mt-2 w-48 bg-[#181825] rounded-xl shadow-xl border border-[#313244] py-1.5 z-50">
                                 @if(auth()->user()->role === 'admin')
                                     <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-sm text-[#cdd6f4] hover:bg-[#313244] hover:text-[#cba6f7]">Dashboard Admin</a>
+                                    <a href="{{ route('admin.fields.index') }}" class="block px-4 py-2 text-sm text-[#cdd6f4] hover:bg-[#313244] hover:text-[#a6e3a1]">Kelola Lapangan</a>
+                                    <a href="{{ route('admin.cashier.index') }}" class="block px-4 py-2 text-sm text-[#cdd6f4] hover:bg-[#313244] hover:text-[#89b4fa]">Kasir & Konfirmasi</a>
                                 @endif
                                 <a href="{{ route('bookings.index') }}" class="block px-4 py-2 text-sm text-[#cdd6f4] hover:bg-[#313244] hover:text-[#a6e3a1]">Pemesanan Saya</a>
                                 <hr class="my-1 border-[#313244]">
@@ -159,6 +167,8 @@
                 <a href="{{ route('bookings.index') }}" class="block px-3 py-2 rounded-xl text-base font-medium text-[#cdd6f4] hover:bg-[#313244] hover:text-[#a6e3a1]">Riwayat Pemesanan</a>
                 @if(auth()->user()->role === 'admin')
                     <a href="{{ route('dashboard') }}" class="block px-3 py-2 rounded-xl text-base font-medium text-[#cba6f7] hover:bg-[#313244]">Dashboard Admin</a>
+                    <a href="{{ route('admin.fields.index') }}" class="block px-3 py-2 rounded-xl text-base font-medium text-[#a6e3a1] hover:bg-[#313244]">Kelola Lapangan</a>
+                    <a href="{{ route('admin.cashier.index') }}" class="block px-3 py-2 rounded-xl text-base font-medium text-[#89b4fa] hover:bg-[#313244]">Kasir & Konfirmasi</a>
                 @endif
                 <form method="POST" action="{{ route('logout') }}" class="pt-2">
                     @csrf
