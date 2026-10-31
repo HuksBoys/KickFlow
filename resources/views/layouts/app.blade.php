@@ -248,7 +248,11 @@
                         <li><a href="{{ route('home') }}" class="hover:text-[#a6e3a1] transition">Beranda</a></li>
                         <li><a href="{{ route('fields.index') }}" class="hover:text-[#a6e3a1] transition">Daftar Lapangan</a></li>
                         <li><a href="{{ route('bookings.index') }}" class="hover:text-[#a6e3a1] transition">Riwayat Pemesanan</a></li>
-                        <li><a href="{{ route('dashboard') }}" class="hover:text-[#cba6f7] transition">Dashboard Admin</a></li>
+                        @auth
+                            @if(auth()->user()->role === 'admin')
+                                <li><a href="{{ route('dashboard') }}" class="hover:text-[#cba6f7] transition">Dashboard Admin</a></li>
+                            @endif
+                        @endauth
                     </ul>
                 </div>
 

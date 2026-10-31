@@ -43,7 +43,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
     Route::patch('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('admin')->name('dashboard');
 });
 
 // Admin routes (auth + admin role)

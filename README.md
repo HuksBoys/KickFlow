@@ -33,13 +33,15 @@
 
 ### 👤 Manajemen Pengguna
 - Registrasi & login pengguna (Customer dan Admin)
-- Autentikasi berbasis peran (Role-Based Access Control)
+- Autentikasi berbasis peran (Role-Based Access Control / RBAC)
+- Proteksi ketat hak akses rute admin & dashboard melalui middleware `EnsureUserIsAdmin` (403 Forbidden untuk non-admin)
 - Manajemen profil pengguna
 
 ### 🏟️ Manajemen Lapangan
-- Tampilan daftar lapangan futsal yang tersedia
+- Tampilan daftar lapangan futsal yang tersedia (Indoor & Outdoor)
+- Tambah lapangan baru dengan upload foto, penentuan tarif per jam, deskripsi & fasilitas (Admin)
 - Detail lapangan lengkap (foto, harga per jam, fasilitas)
-- Status ketersediaan lapangan secara real-time
+- Status ketersediaan lapangan secara real-time dan toggle status aktif/nonaktif
 
 ### 📅 Sistem Booking
 - Pemesanan lapangan dengan pemilihan tanggal & jam
@@ -47,9 +49,11 @@
 - Riwayat pemesanan untuk setiap pengguna
 - Manajemen jadwal booking oleh Admin
 
-### 💳 Pembayaran
+### 💳 Pembayaran & Kasir
 - Proses pembayaran booking lapangan
-- Konfirmasi pembayaran manual oleh Admin
+- Modul Kasir (Point of Sale) untuk konfirmasi pesanan pending dan penerimaan bayar lunas langsung
+- Penyelesaian sewa lapangan dan pembatalan otomatis dengan status refund
+- Cetak struk nota resmi pemesanan lapangan (`window.print()`)
 - Riwayat transaksi pembayaran
 
 ### 🤖 Asisten AI (Gemini)
@@ -58,10 +62,11 @@
 - Bantuan informasi seputar booking dan fasilitas
 
 ### 📊 Dashboard Admin
-- Statistik booking dan pendapatan
-- Manajemen lapangan (CRUD)
-- Manajemen pengguna dan booking
-- Laporan aktivitas platform
+- Proteksi akses eksklusif Administrator (Customer dan tamu ditolak)
+- Statistik booking harian dan pendapatan platform real-time
+- Manajemen lapangan (CRUD lengkap)
+- Akses cepat ke antrean Kasir & Konfirmasi pesanan
+- Laporan 10 aktivitas transaksi terbaru platform
 
 ---
 
@@ -352,6 +357,7 @@ KickFlow/
 | 2026-10-29 19:30 / v0.7.1 | [DevOps-Agent] | Perbaikan Unduhan Statis Vercel & Normalisasi Rute | Perbaikan masalah file index.php terunduh mentah: menghapus handle: filesystem, menambahkan normalisasi SCRIPT_NAME di api/index.php, dan rute eksplisit aset /build/(.*) | `vercel.json`, `api/index.php`, `README.md` |
 | 2026-10-29 19:40 / v0.7.2 | [DevOps-Agent] | Resolusi STATIC_BUILD_NO_OUT_DIR (dist) | Menetapkan outputDirectory: "public" di vercel.json untuk mengatasi pencarian folder "dist" oleh preset build Vite Vercel, serta panduan penggantian Framework Preset ke "Other" | `vercel.json`, `README.md` |
 | 2026-10-30 15:10 / v0.8.0 | [Admin-Agent] | Fitur Tambah Lapangan & Kasir (Konfirmasi Pesanan) | Implementasi modul admin menyeluruh: Manajemen Lapangan (tambah lapangan baru, upload foto, edit, hapus, toggle status) dan Modul Kasir (konfirmasi pesanan pending, terima pembayaran lunas, penyelesaian booking, pembatalan, cetak struk nota, filter status multi-kriteria), didukung middleware `EnsureUserIsAdmin` serta automated test suite lengkap (27 passed, 94 assertions) | `app/Http/Controllers/Admin/FieldController.php`, `app/Http/Controllers/Admin/CashierController.php`, `app/Http/Middleware/EnsureUserIsAdmin.php`, `app/Http/Requests/Admin/*`, `resources/views/admin/*`, `resources/views/layouts/app.blade.php`, `resources/views/dashboard.blade.php`, `tests/Feature/AdminFieldManagementTest.php`, `tests/Feature/AdminCashierTest.php`, `README.md` |
+| 2026-10-31 18:30 / v0.8.1 | [Security-Agent] | Pengamanan Akses Dashboard Admin & Otorisasi RBAC | Pengetatan otorisasi rute `/dashboard` dengan middleware `admin` (`EnsureUserIsAdmin`) untuk mencegah customer mengakses statistik dan data reservasi admin (HTTP 403 Forbidden), penyembunyian tautan navigasi Dashboard Admin pada footer untuk non-admin di `layouts/app.blade.php`, serta penambahan 3 automated feature tests pengujian akses dashboard (30 passed, 99 assertions) | `routes/web.php`, `resources/views/layouts/app.blade.php`, `tests/Feature/AdminFieldManagementTest.php`, `README.md` |
 
 ---
 

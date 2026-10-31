@@ -14,6 +14,41 @@ class AdminFieldManagementTest extends TestCase
     use RefreshDatabase;
 
     /**
+     * Test guest is redirected to login when accessing admin dashboard.
+     */
+    public function test_guest_cannot_access_admin_dashboard(): void
+    {
+        $response = $this->get('/dashboard');
+
+        $response->assertRedirect('/login');
+    }
+
+    /**
+     * Test customer receives 403 forbidden when accessing admin dashboard.
+     */
+    public function test_customer_cannot_access_admin_dashboard(): void
+    {
+        $customer = User::factory()->create(['role' => 'customer']);
+
+        $response = $this->actingAs($customer)->get('/dashboard');
+
+        $response->assertStatus(403);
+    }
+
+    /**
+     * Test admin can access admin dashboard.
+     */
+    public function test_admin_can_access_admin_dashboard(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $response = $this->actingAs($admin)->get('/dashboard');
+
+        $response->assertStatus(200);
+        $response->assertSee('Dashboard Manajemen KickFlow');
+    }
+
+    /**
      * Test guest is redirected to login when accessing admin fields.
      */
     public function test_guest_cannot_access_admin_fields(): void
