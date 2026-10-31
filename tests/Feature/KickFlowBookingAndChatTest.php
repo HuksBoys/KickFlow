@@ -218,4 +218,76 @@ class KickFlowBookingAndChatTest extends TestCase
 
         $this->assertEquals('cancelled', $booking->fresh()->status);
     }
+
+    /**
+     * Test customer can view own booking detail.
+     */
+    public function test_customer_can_view_own_booking_detail(): void
+    {
+        $user = User::factory()->create(['role' => 'customer']);
+        $field = Field::factory()->create(['name' => 'Lapangan Hebat']);
+        $booking = Booking::create([
+            'user_id' => $user->id,
+            'field_id' => $field->id,
+            'booking_date' => now()->addDays(2)->format('Y-m-d'),
+            'start_time' => '17:00',
+            'end_time' => '18:00',
+            'duration_hours' => 1,
+            'total_price' => 100000,
+            'status' => 'pending',
+            'payment_status' => 'unpaid',
+        ]);
+
+        $response = $this->actingAs($user)->get("/bookings/{$booking->id}");
+        $response->assertStatus(200);
+        $response->assertSee('Lapangan Hebat');
+    }
+
+    /**
+     * Test customer cannot view other user booking detail.
+     */
+    public function test_customer_cannot_view_other_user_booking_detail(): void
+    {
+        $user1 = User::factory()->create(['role' => 'customer']);
+        $user2 = User::factory()->create(['role' => 'customer']);
+        $field = Field::factory()->create();
+        $booking = Booking::create([
+            'user_id' => $user1->id,
+            'field_id' => $field->id,
+            'booking_date' => now()->addDays(2)->format('Y-m-d'),
+            'start_time' => '17:00',
+            'end_time' => '18:00',
+            'duration_hours' => 1,
+            'total_price' => 100000,
+            'status' => 'pending',
+            'payment_status' => 'unpaid',
+        ]);
+
+        $response = $this->actingAs($user2)->get("/bookings/{$booking->id}");
+        $response->assertStatus(403);
+    }
+
+    /**
+     * Test admin can view any customer booking detail.
+     */
+    public function test_admin_can_view_any_customer_booking_detail(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $user = User::factory()->create(['role' => 'customer']);
+        $field = Field::factory()->create();
+        $booking = Booking::create([
+            'user_id' => $user->id,
+            'field_id' => $field->id,
+            'booking_date' => now()->addDays(2)->format('Y-m-d'),
+            'start_time' => '17:00',
+            'end_time' => '18:00',
+            'duration_hours' => 1,
+            'total_price' => 100000,
+            'status' => 'pending',
+            'payment_status' => 'unpaid',
+        ]);
+
+        $response = $this->actingAs($admin)->get("/bookings/{$booking->id}");
+        $response->assertStatus(200);
+    }
 }

@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\Field;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class BookingController extends Controller
@@ -104,7 +105,7 @@ class BookingController extends Controller
      */
     public function show(Booking $booking): View
     {
-        $this->authorize('view', $booking);
+        Gate::authorize('view', $booking);
 
         $booking->load('field', 'user');
 
@@ -116,7 +117,7 @@ class BookingController extends Controller
      */
     public function edit(Booking $booking): View
     {
-        $this->authorize('update', $booking);
+        Gate::authorize('update', $booking);
 
         $fields = Field::where('is_active', true)->get();
 
@@ -128,7 +129,7 @@ class BookingController extends Controller
      */
     public function update(StoreBookingRequest $request, Booking $booking): RedirectResponse
     {
-        $this->authorize('update', $booking);
+        Gate::authorize('update', $booking);
 
         $validated = $request->validated();
 
@@ -166,7 +167,7 @@ class BookingController extends Controller
      */
     public function destroy(Booking $booking): RedirectResponse
     {
-        $this->authorize('delete', $booking);
+        Gate::authorize('delete', $booking);
 
         $booking->update(['status' => 'cancelled']);
 
