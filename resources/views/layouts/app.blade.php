@@ -438,23 +438,24 @@
 
         <!-- Chat Window Panel (The Arena Command Terminal) -->
         <div x-show="isOpen" 
-             x-transition:enter="transition cubic-bezier(0.16, 1, 0.3, 1) duration-300"
-             x-transition:enter-start="opacity-0 translate-y-6 scale-95"
+             @click.outside="isOpen = false"
+             @keydown.escape.window="isOpen = false"
+             x-transition:enter="transition cubic-bezier(0.16, 1, 0.3, 1) duration-200"
+             x-transition:enter-start="opacity-0 translate-y-4 scale-95"
              x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave="transition ease-in duration-150"
              x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-             x-transition:leave-end="opacity-0 translate-y-6 scale-95"
-             :class="isExpanded ? 'w-[96vw] sm:w-[600px] h-[640px]' : 'w-[94vw] sm:w-[420px] h-[580px]'"
-             class="absolute bottom-18 right-0 bg-[#0a100d]/98 backdrop-blur-2xl rounded-2xl shadow-[0_30px_70px_-15px_rgba(0,0,0,0.9),0_0_40px_rgba(16,185,129,0.12)] border border-[#1f2f25] flex flex-col overflow-hidden transition-all duration-300">
+             x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+             class="absolute bottom-16 sm:bottom-20 right-0 w-[92vw] sm:w-[390px] h-[520px] max-h-[calc(100vh-6.5rem)] bg-[#0a100d]/98 backdrop-blur-2xl rounded-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85),0_0_35px_rgba(16,185,129,0.15)] border border-[#1f2f25] flex flex-col overflow-hidden">
             
             <!-- Window Command Header -->
-            <div class="bg-[#0e1612] border-b border-[#1b2922] px-4 py-3 flex items-center justify-between relative overflow-hidden">
+            <div class="bg-[#0e1612] border-b border-[#1b2922] px-4 py-3 flex items-center justify-between relative overflow-hidden flex-shrink-0">
                 <!-- Subtle tactical background line -->
                 <div class="absolute inset-0 tactical-grid opacity-20 pointer-events-none"></div>
 
                 <div class="flex items-center gap-3 relative z-10">
                     <div class="relative">
-                        <div class="w-10 h-10 rounded-xl bg-[#15201a] border border-[#10b981]/30 flex items-center justify-center text-[#10b981] shadow-inner">
+                        <div class="w-9 h-9 rounded-xl bg-[#15201a] border border-[#10b981]/30 flex items-center justify-center text-[#10b981] shadow-inner">
                             <svg class="w-5 h-5 text-[#34d399]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect width="16" height="12" x="4" y="8" rx="2"/>
                                 <path d="M12 8V4H8"/>
@@ -462,8 +463,8 @@
                                 <circle cx="15" cy="14" r="1" fill="currentColor"/>
                             </svg>
                         </div>
-                        <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-[#10b981] border-2 border-[#0e1612] rounded-full animate-ping"></span>
-                        <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-[#00e575] border-2 border-[#0e1612] rounded-full"></span>
+                        <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-[#10b981] border-2 border-[#0e1612] rounded-full animate-ping"></span>
+                        <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-[#00e575] border-2 border-[#0e1612] rounded-full"></span>
                     </div>
                     <div>
                         <div class="flex items-center gap-1.5">
@@ -489,47 +490,15 @@
                         </svg>
                     </button>
 
-                    <!-- Expand / Contract toggle (Desktop only) -->
-                    <button @click="isExpanded = !isExpanded" 
-                            :title="isExpanded ? 'Kecilkan jendela' : 'Perlebar jendela'"
-                            class="hidden sm:inline-block p-1.5 rounded-lg text-[#64748b] hover:text-[#f8fafc] hover:bg-[#15201a] transition-colors">
-                        <svg x-show="!isExpanded" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
-                        </svg>
-                        <svg x-show="isExpanded" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7"/>
-                        </svg>
-                    </button>
-
-                    <!-- Close button -->
-                    <button @click="toggleChat()" 
-                            class="p-1.5 rounded-lg text-[#64748b] hover:text-[#f8fafc] hover:bg-[#15201a] transition-colors" 
-                            title="Tutup chat">
+                    <!-- Minimize / Close button -->
+                    <button @click="isOpen = false" 
+                            class="p-1.5 rounded-lg text-[#94a3b8] hover:text-[#f8fafc] hover:bg-[#15201a] transition-colors" 
+                            title="Kecilkan / Tutup chat">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                     </button>
                 </div>
-            </div>
-
-            <!-- Quick Suggestions Bar (Always Accessible Horizon) -->
-            <div class="bg-[#0b120f] border-b border-[#1b2922] px-3 py-2 flex items-center gap-1.5 overflow-x-auto text-xs whitespace-nowrap scrollbar-none">
-                <button @click="sendQuick('Cek lapangan yang tersedia')" 
-                        class="px-2.5 py-1 bg-[#101814] hover:bg-[#15201a] border border-[#24362d] hover:border-[#10b981]/50 text-[#cbd5e1] hover:text-[#34d399] rounded-md transition-colors flex items-center gap-1 text-[11px] font-mono">
-                    <span class="text-[#38bdf8]">🏟️</span> Lapangan Kosong
-                </button>
-                <button @click="sendQuick('Pesan lapangan Garuda Sport besok jam 19:00 selama 2 jam')" 
-                        class="px-2.5 py-1 bg-[#15201a] hover:bg-[#1b2922] border border-[#10b981]/40 text-[#34d399] rounded-md transition-colors flex items-center gap-1 text-[11px] font-mono font-medium">
-                    <span class="text-[#10b981]">⚡</span> Booking via AI
-                </button>
-                <button @click="sendQuick('Berapa tarif harga sewa per jam?')" 
-                        class="px-2.5 py-1 bg-[#101814] hover:bg-[#15201a] border border-[#24362d] hover:border-[#f59e0b]/50 text-[#cbd5e1] hover:text-[#f59e0b] rounded-md transition-colors flex items-center gap-1 text-[11px] font-mono">
-                    <span class="text-[#f59e0b]">💰</span> Info Tarif
-                </button>
-                <button @click="sendQuick('Cek status booking saya')" 
-                        class="px-2.5 py-1 bg-[#101814] hover:bg-[#15201a] border border-[#24362d] hover:border-[#38bdf8]/50 text-[#cbd5e1] hover:text-[#38bdf8] rounded-md transition-colors flex items-center gap-1 text-[11px] font-mono">
-                    <span class="text-[#38bdf8]">📋</span> Cek Booking
-                </button>
             </div>
 
             <!-- Messages Log -->
@@ -741,7 +710,6 @@
         function kickflowChatbot() {
             return {
                 isOpen: false,
-                isExpanded: false,
                 showTooltip: true,
                 isTyping: false,
                 inputMessage: '',
