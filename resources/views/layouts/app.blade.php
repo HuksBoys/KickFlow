@@ -595,11 +595,11 @@
                             <!-- Bubble Container -->
                             <div class="p-3.5 shadow-md leading-relaxed text-xs sm:text-sm break-words"
                                  :class="item.role === 'user' 
-                                    ? 'bg-gradient-to-r from-[#10b981] to-[#059669] text-[#052313] font-semibold rounded-2xl rounded-tr-xs shadow-emerald-950/20' 
-                                    : 'bg-[#101814] border border-[#24362d] rounded-2xl rounded-tl-xs text-[#cbd5e1]'">
+                                    ? 'bg-gradient-to-br from-[#059669] to-[#047857] text-white font-medium rounded-2xl rounded-tr-xs shadow-md shadow-emerald-950/40 border border-[#10b981]/40' 
+                                    : 'bg-[#101814] border border-[#24362d] rounded-2xl rounded-tl-xs text-[#f1f5f9]'">
                                 
                                 <!-- Formatted Content -->
-                                <div class="whitespace-pre-line" x-html="formatMessage(item.text)"></div>
+                                <div class="whitespace-pre-line" x-html="formatMessage(item.text, item.role)"></div>
 
                                 <!-- Dynamic Tactical Function Badge -->
                                 <template x-if="item.functionCalled">
@@ -633,7 +633,7 @@
 
                         <!-- User Avatar -->
                         <template x-if="item.role === 'user'">
-                            <div class="w-7 h-7 rounded-lg bg-[#15201a] border border-[#24362d] text-[#cbd5e1] flex items-center justify-center flex-shrink-0 text-[10px] font-bold font-mono mt-1">
+                            <div class="w-7 h-7 rounded-lg bg-[#059669] border border-[#10b981]/50 text-white flex items-center justify-center flex-shrink-0 text-[10px] font-bold font-mono mt-1 shadow-sm">
                                 {{ strtoupper(substr(auth()->user()?->name ?? 'User', 0, 1)) }}
                             </div>
                         </template>
@@ -743,7 +743,7 @@
                     this.sendMessage();
                 },
 
-                formatMessage(text) {
+                formatMessage(text, role = 'assistant') {
                     if (!text) return '';
                     // Escape basic HTML tags to avoid injection
                     let escaped = text
@@ -751,11 +751,14 @@
                         .replace(/</g, '&lt;')
                         .replace(/>/g, '&gt;');
 
-                    // Convert **bold** to <strong>
-                    escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#34d399] font-bold">$1</strong>');
-                    
-                    // Convert booking ID patterns to styled badges
-                    escaped = escaped.replace(/(#KF-\d+)/g, '<span class="px-1.5 py-0.5 rounded bg-[#15201a] text-[#34d399] border border-[#10b981]/30 font-mono font-bold">$1</span>');
+                    if (role === 'user') {
+                        // User message: keep bold text clean and bright white
+                        escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-bold">$1</strong>');
+                    } else {
+                        // Assistant message: highlight bold keywords and booking ID badges
+                        escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#34d399] font-bold">$1</strong>');
+                        escaped = escaped.replace(/(#KF-\d+)/g, '<span class="px-1.5 py-0.5 rounded bg-[#15201a] text-[#34d399] border border-[#10b981]/30 font-mono font-bold">$1</span>');
+                    }
 
                     return escaped;
                 },
