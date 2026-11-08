@@ -3,96 +3,113 @@
 @section('title', 'Riwayat Pemesanan - KickFlow')
 
 @section('content')
-<div class="bg-gradient-to-b from-[#181825] to-[#1e1e2e] text-[#cdd6f4] py-10 border-b border-[#313244]">
+<!-- Header Banner -->
+<div class="bg-[#0b110e] border-b border-[#1b2922] py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-extrabold tracking-tight">Riwayat Pemesanan Saya</h1>
-            <p class="mt-2 text-[#a6adc8] text-sm">
-                Lihat status booking, jadwal main, dan rincian transaksi lapangan futsal Anda.
+            <div class="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-[#10b981] font-semibold mb-1">
+                <span>[BOOKINGS]</span>
+                <span>CUSTOMER RESERVATION HISTORY</span>
+            </div>
+            <h1 class="font-display text-2xl sm:text-3xl font-bold tracking-tight text-[#f8fafc]">Riwayat Pemesanan Saya</h1>
+            <p class="mt-1 text-xs text-[#94a3b8]">
+                Pantau status konfirmasi, jadwal main, dan rincian tiket transaksi lapangan futsal Anda.
             </p>
         </div>
         <div>
-            <a href="{{ route('fields.index') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#a6e3a1] text-[#11111b] font-bold text-xs rounded-xl hover:bg-[#94e2d5] shadow-sm transition">
-                <span>➕</span> Pesan Lapangan Baru
+            <a href="{{ route('fields.index') }}" 
+               class="inline-flex items-center gap-2 px-4 py-2.5 bg-[#10b981] hover:bg-[#34d399] text-[#070b09] font-bold text-xs rounded-lg transition-colors shadow-sm">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+                <span>Pesan Lapangan Baru</span>
             </a>
         </div>
     </div>
 </div>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     @if($bookings->isEmpty())
-        <div class="bg-[#181825] rounded-3xl border border-[#313244] p-12 text-center max-w-xl mx-auto shadow-sm">
-            <div class="w-20 h-20 bg-[#313244] text-[#a6e3a1] rounded-3xl border border-[#45475a] flex items-center justify-center text-4xl mx-auto mb-4">
-                ⚽
+        <div class="bg-[#101814] rounded-xl border border-[#24362d] p-12 text-center max-w-lg mx-auto">
+            <div class="w-14 h-14 bg-[#15201a] text-[#10b981] rounded-xl border border-[#24362d] flex items-center justify-center text-xl mx-auto mb-4">
+                <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="m4.93 4.93 4.24 4.24"/>
+                    <path d="m14.83 9.17 4.24-4.24"/>
+                    <circle cx="12" cy="12" r="2"/>
+                </svg>
             </div>
-            <h3 class="text-xl font-bold text-[#cdd6f4]">Belum Ada Pemesanan</h3>
-            <p class="text-sm text-[#a6adc8] mt-2 mb-6">
-                Anda belum memiliki riwayat pemesanan lapangan futsal. Yuk, cari lapangan terbaik dan tentukan jadwal main tim Anda sekarang!
+            <h3 class="font-display text-lg font-bold text-[#f8fafc]">Belum Ada Pemesanan</h3>
+            <p class="text-xs text-[#94a3b8] mt-1.5 mb-6 leading-relaxed">
+                Anda belum memiliki riwayat reservasi lapangan futsal. Pilih arena terbaik dan tentukan jadwal tanding tim Anda sekarang.
             </p>
-            <a href="{{ route('fields.index') }}" class="inline-flex items-center px-6 py-3 bg-[#a6e3a1] hover:bg-[#94e2d5] text-[#11111b] font-bold text-sm rounded-xl shadow-md shadow-[#a6e3a1]/20 transition">
-                Jelajahi Lapangan Futsal
+            <a href="{{ route('fields.index') }}" 
+               class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-[#10b981] hover:bg-[#34d399] text-[#070b09] font-bold text-xs rounded-lg transition-colors">
+                <span>Jelajahi Lapangan Futsal</span>
+                <span aria-hidden="true">→</span>
             </a>
         </div>
     @else
-        <div class="bg-[#181825] rounded-3xl border border-[#313244] shadow-sm overflow-hidden">
+        <div class="bg-[#101814] rounded-xl border border-[#24362d] overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-[#313244]">
-                    <thead class="bg-[#11111b] text-left text-xs font-bold text-[#a6adc8] uppercase tracking-wider">
+                <table class="min-w-full divide-y divide-[#1b2922]">
+                    <thead class="bg-[#0b110e] text-left text-[11px] font-mono text-[#64748b] uppercase tracking-wider">
                         <tr>
-                            <th class="px-6 py-4">No. Booking</th>
-                            <th class="px-6 py-4">Lapangan</th>
-                            <th class="px-6 py-4">Jadwal Main</th>
-                            <th class="px-6 py-4">Durasi</th>
-                            <th class="px-6 py-4">Total Biaya</th>
-                            <th class="px-6 py-4">Status Booking</th>
-                            <th class="px-6 py-4 text-right">Aksi</th>
+                            <th class="px-5 py-3.5">No. Booking</th>
+                            <th class="px-5 py-3.5">Lapangan</th>
+                            <th class="px-5 py-3.5">Jadwal Tanding</th>
+                            <th class="px-5 py-3.5">Durasi</th>
+                            <th class="px-5 py-3.5">Total Biaya</th>
+                            <th class="px-5 py-3.5">Status Booking</th>
+                            <th class="px-5 py-3.5 text-right">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-[#313244] text-sm">
+                    <tbody class="divide-y divide-[#1b2922] text-xs">
                         @foreach($bookings as $booking)
-                            <tr class="hover:bg-[#313244]/40 transition">
-                                <td class="px-6 py-4 whitespace-nowrap font-mono text-xs font-semibold text-[#a6adc8]">
+                            <tr class="hover:bg-[#15201a]/60 transition-colors">
+                                <td class="px-5 py-4 whitespace-nowrap font-mono font-semibold text-[#cbd5e1]">
                                     #KF-{{ str_pad($booking->id, 5, '0', STR_PAD_LEFT) }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="font-bold text-[#cdd6f4]">{{ $booking->field->name ?? 'Lapangan Tidak Ditemukan' }}</div>
-                                    <div class="text-xs text-[#6c7086] capitalize">{{ $booking->field->type ?? '-' }}</div>
+                                <td class="px-5 py-4 whitespace-nowrap">
+                                    <div class="font-display font-bold text-[#f8fafc]">{{ $booking->field->name ?? 'Lapangan Tidak Ditemukan' }}</div>
+                                    <div class="text-[11px] font-mono text-[#64748b] capitalize">{{ $booking->field->type ?? '-' }}</div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="font-semibold text-[#cdd6f4]">
+                                <td class="px-5 py-4 whitespace-nowrap">
+                                    <div class="font-medium text-[#f8fafc]">
                                         {{ \Carbon\Carbon::parse($booking->booking_date)->translatedFormat('l, d F Y') }}
                                     </div>
-                                    <div class="text-xs text-[#a6e3a1] font-medium">
+                                    <div class="text-[11px] font-mono text-[#34d399]">
                                         {{ substr($booking->start_time, 0, 5) }} - {{ substr($booking->end_time, 0, 5) }} WIB
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-[#a6adc8]">
+                                <td class="px-5 py-4 whitespace-nowrap font-mono text-[#cbd5e1]">
                                     {{ $booking->duration_hours }} Jam
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap font-bold text-[#a6e3a1]">
+                                <td class="px-5 py-4 whitespace-nowrap font-mono font-bold text-[#34d399]">
                                     Rp {{ number_format($booking->total_price, 0, ',', '.') }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-5 py-4 whitespace-nowrap">
                                     @if($booking->status === 'pending')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#f9e2af]/15 text-[#f9e2af] border border-[#f9e2af]/30">
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-mono font-bold bg-[#f59e0b]/15 text-[#f59e0b] border border-[#f59e0b]/30">
                                             ⏳ Menunggu Konfirmasi
                                         </span>
                                     @elseif($booking->status === 'confirmed')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#a6e3a1]/15 text-[#a6e3a1] border border-[#a6e3a1]/30">
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-mono font-bold bg-[#10b981]/15 text-[#34d399] border border-[#10b981]/30">
                                             ✅ Terkonfirmasi
                                         </span>
                                     @elseif($booking->status === 'cancelled')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#f38ba8]/15 text-[#f38ba8] border border-[#f38ba8]/30">
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-mono font-bold bg-[#ef4444]/15 text-[#fca5a5] border border-[#ef4444]/30">
                                             ❌ Dibatalkan
                                         </span>
                                     @elseif($booking->status === 'completed')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#89b4fa]/15 text-[#89b4fa] border border-[#89b4fa]/30">
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-mono font-bold bg-[#38bdf8]/15 text-[#38bdf8] border border-[#38bdf8]/30">
                                             🏆 Selesai
                                         </span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right space-x-2">
-                                    <a href="{{ route('bookings.show', $booking) }}" class="inline-block px-3 py-1.5 bg-[#313244] hover:bg-[#45475a] text-[#cdd6f4] text-xs font-semibold rounded-xl transition">
+                                <td class="px-5 py-4 whitespace-nowrap text-right space-x-1.5">
+                                    <a href="{{ route('bookings.show', $booking) }}" 
+                                       class="inline-block px-3 py-1.5 bg-[#15201a] hover:bg-[#1b2922] border border-[#24362d] text-[#cbd5e1] text-xs font-medium rounded-lg transition-colors">
                                         Detail
                                     </a>
 
@@ -100,7 +117,8 @@
                                         <form method="POST" action="{{ route('bookings.cancel', $booking) }}" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan booking ini?');">
                                             @csrf
                                             @method('PATCH')
-                                            <button type="submit" class="px-3 py-1.5 bg-[#f38ba8]/15 hover:bg-[#f38ba8]/25 text-[#f38ba8] border border-[#f38ba8]/30 text-xs font-semibold rounded-xl transition">
+                                            <button type="submit" 
+                                                    class="px-3 py-1.5 bg-[#151010] hover:bg-[#201515] text-[#ef4444] border border-[#ef4444]/30 text-xs font-medium rounded-lg transition-colors">
                                                 Batalkan
                                             </button>
                                         </form>
@@ -112,9 +130,11 @@
                 </table>
             </div>
 
-            <div class="px-6 py-4 border-t border-[#313244]">
-                {{ $bookings->links() }}
-            </div>
+            @if($bookings->hasPages())
+                <div class="px-5 py-3.5 border-t border-[#1b2922]">
+                    {{ $bookings->links() }}
+                </div>
+            @endif
         </div>
     @endif
 </div>
