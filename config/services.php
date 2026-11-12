@@ -41,4 +41,8 @@ return [
         'base_url' => 'https://generativelanguage.googleapis.com/v1beta',
     ],
 
+    'vercel_blob' => [
+        'token' => env('BLOB_READ_WRITE_TOKEN'),
+    ],
+
 ];

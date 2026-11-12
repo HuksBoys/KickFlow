@@ -31,6 +31,28 @@ class KickFlowBookingAndChatTest extends TestCase
         $response->assertSee('150.000');
     }
 
+    public function test_public_field_pages_render_uploaded_images(): void
+    {
+        $field = Field::factory()->create([
+            'image_path' => 'https://store.public.blob.vercel-storage.com/fields/arena-futsal.jpg',
+            'is_active' => true,
+        ]);
+
+        $imageUrl = $field->imageUrl();
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee($imageUrl, false);
+
+        $this->get('/fields')
+            ->assertOk()
+            ->assertSee($imageUrl, false);
+
+        $this->get("/fields/{$field->id}")
+            ->assertOk()
+            ->assertSee($imageUrl, false);
+    }
+
     /**
      * Test user can create a booking successfully.
      */

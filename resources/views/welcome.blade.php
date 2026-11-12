@@ -173,18 +173,23 @@
                 
                 <!-- Card Visual Header -->
                 <div class="h-44 bg-[#0b110e] border-b border-[#1b2922] relative flex items-center justify-center p-4">
-                    <!-- Tactical pitch lines SVG graphic -->
-                    <div class="w-full h-full border border-[#24362d] rounded-lg flex items-center justify-center relative bg-[#070b09]/60">
-                        <div class="absolute inset-y-0 left-1/2 w-px bg-[#24362d]"></div>
-                        <div class="w-14 h-14 rounded-full border border-[#24362d] flex items-center justify-center text-[#4a6b5c]">
-                            <svg class="w-6 h-6 group-hover:text-[#10b981] transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                <circle cx="12" cy="12" r="10"/>
-                                <path d="m4.93 4.93 4.24 4.24"/>
-                                <path d="m14.83 9.17 4.24-4.24"/>
-                                <circle cx="12" cy="12" r="2"/>
-                            </svg>
+                    @if($field->imageUrl())
+                        <img src="{{ $field->imageUrl() }}" alt="{{ $field->name }}" class="absolute inset-0 w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#070b09]/65 to-transparent"></div>
+                    @else
+                        <!-- Tactical pitch lines SVG graphic -->
+                        <div class="w-full h-full border border-[#24362d] rounded-lg flex items-center justify-center relative bg-[#070b09]/60">
+                            <div class="absolute inset-y-0 left-1/2 w-px bg-[#24362d]"></div>
+                            <div class="w-14 h-14 rounded-full border border-[#24362d] flex items-center justify-center text-[#4a6b5c]">
+                                <svg class="w-6 h-6 group-hover:text-[#10b981] transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="m4.93 4.93 4.24 4.24"/>
+                                    <path d="m14.83 9.17 4.24-4.24"/>
+                                    <circle cx="12" cy="12" r="2"/>
+                                </svg>
+                            </div>
                         </div>
-                    </div>
+                    @endif
 
                     <!-- Type Badge -->
                     <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md text-[10px] font-mono font-bold uppercase tracking-wider {{ $field->type === 'indoor' ? 'bg-[#38bdf8]/15 text-[#38bdf8] border border-[#38bdf8]/30' : 'bg-[#f59e0b]/15 text-[#f59e0b] border border-[#f59e0b]/30' }}">

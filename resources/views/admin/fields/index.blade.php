@@ -114,7 +114,7 @@
                                 <div class="flex items-center gap-3">
                                     <div class="w-11 h-11 rounded-lg bg-[#15201a] border border-[#24362d] overflow-hidden flex-shrink-0 flex items-center justify-center text-[#10b981]">
                                         @if($field->image_path)
-                                            <img src="{{ asset('storage/' . $field->image_path) }}" alt="{{ $field->name }}" class="w-full h-full object-cover">
+                                            <img src="{{ $field->imageUrl() }}" alt="{{ $field->name }}" class="w-full h-full object-cover">
                                         @else
                                             <svg class="w-6 h-6 text-[#4a6b5c]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                                 <circle cx="12" cy="12" r="10"/>

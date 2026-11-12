@@ -112,7 +112,7 @@
                 
                 @if($field->image_path)
                     <div class="mb-3 flex items-center gap-3 p-3 bg-[#0b110e] rounded-lg border border-[#1b2922] max-w-md">
-                        <img src="{{ asset('storage/' . $field->image_path) }}" alt="{{ $field->name }}" class="w-14 h-14 rounded-md object-cover border border-[#24362d]">
+                        <img src="{{ $field->imageUrl() }}" alt="{{ $field->name }}" class="w-14 h-14 rounded-md object-cover border border-[#24362d]">
                         <div>
                             <span class="text-xs font-bold text-[#f8fafc] block">Foto Saat Ini</span>
                             <span class="text-[11px] text-[#64748b]">Pilih file baru di bawah jika ingin mengganti gambar.</span>

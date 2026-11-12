@@ -6,13 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreFieldRequest;
 use App\Http\Requests\Admin\UpdateFieldRequest;
 use App\Models\Field;
+use App\Services\VercelBlobService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class FieldController extends Controller
 {
+    public function __construct(private VercelBlobService $vercelBlob) {}
+
     /**
      * Display a listing of all fields (active and inactive) for admin management.
      */
@@ -59,7 +61,7 @@ class FieldController extends Controller
         $validated['is_active'] = $request->boolean('is_active', true);
 
         if ($request->hasFile('image')) {
-            $validated['image_path'] = $request->file('image')->store('fields', 'public');
+            $validated['image_path'] = $this->vercelBlob->store($request->file('image'));
         }
 
         Field::create($validated);
@@ -87,12 +89,11 @@ class FieldController extends Controller
         $validated['is_active'] = $request->boolean('is_active');
 
         if ($request->hasFile('image')) {
-            // Delete old image if exists
-            if ($field->image_path) {
-                Storage::disk('public')->delete($field->image_path);
-            }
+            $validated['image_path'] = $this->vercelBlob->store($request->file('image'));
 
-            $validated['image_path'] = $request->file('image')->store('fields', 'public');
+            if ($field->image_path) {
+                $this->vercelBlob->delete($field->image_path);
+            }
         }
 
         $field->update($validated);
@@ -107,7 +108,7 @@ class FieldController extends Controller
     public function destroy(Field $field): RedirectResponse
     {
         if ($field->image_path) {
-            Storage::disk('public')->delete($field->image_path);
+            $this->vercelBlob->delete($field->image_path);
         }
 
         $field->delete();

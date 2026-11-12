@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Models\Field;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\Request as HttpRequest;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -131,6 +133,41 @@ class AdminFieldManagementTest extends TestCase
         $field = Field::where('name', 'Arena Futsal Megah')->first();
         $this->assertNotNull($field->image_path);
         Storage::disk('public')->assertExists($field->image_path);
+    }
+
+    public function test_admin_stores_uploaded_image_in_vercel_blob(): void
+    {
+        config()->set('services.vercel_blob.token', 'vercel_blob_rw_test_store');
+        Http::preventStrayRequests();
+        Http::fake([
+            'https://vercel.com/api/blob/*' => Http::response([
+                'url' => 'https://store.public.blob.vercel-storage.com/fields/lapangan-baru.jpg',
+            ]),
+        ]);
+
+        $admin = User::factory()->admin()->create();
+
+        $response = $this->actingAs($admin)->post('/admin/fields', [
+            'name' => 'Arena Vercel',
+            'type' => 'indoor',
+            'price_per_hour' => 175000,
+            'image' => UploadedFile::fake()->image('lapangan-baru.jpg', 600, 400),
+            'is_active' => '1',
+        ]);
+
+        $response->assertRedirect('/admin/fields');
+        $this->assertDatabaseHas('fields', [
+            'name' => 'Arena Vercel',
+            'image_path' => 'https://store.public.blob.vercel-storage.com/fields/lapangan-baru.jpg',
+        ]);
+        Http::assertSent(function (HttpRequest $request): bool {
+            return $request->method() === 'PUT'
+                && $request->url() === 'https://vercel.com/api/blob/?pathname=fields%2Flapangan-baru.jpg'
+                && $request->header('Authorization') === ['Bearer vercel_blob_rw_test_store']
+                && $request->header('X-Api-Version') === ['13']
+                && $request->header('X-Vercel-Blob-Store-Id') === ['test']
+                && $request->header('X-Vercel-Blob-Access') === ['public'];
+        });
     }
 
     /**

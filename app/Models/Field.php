@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 #[Fillable(['name', 'type', 'price_per_hour', 'description', 'image_path', 'is_active'])]
 class Field extends Model
@@ -45,5 +46,22 @@ class Field extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function imageUrl(): ?string
+    {
+        if (! $this->image_path) {
+            return null;
+        }
+
+        if (filter_var($this->image_path, FILTER_VALIDATE_URL)) {
+            return $this->image_path;
+        }
+
+        if (! Storage::disk('public')->exists($this->image_path)) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->image_path);
     }
 }
