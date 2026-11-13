@@ -475,7 +475,7 @@
                         </div>
                         <div class="flex items-center gap-1.5 text-[10px] text-[#94a3b8] font-mono">
                             <span class="w-1.5 h-1.5 rounded-full bg-[#10b981]"></span>
-                            <span>Siap Reservasi & Cek Jadwal</span>
+                            <span>{{ auth()->user()?->role === 'admin' ? 'Siap Ringkas Operasional' : 'Siap Reservasi & Cek Jadwal' }}</span>
                         </div>
                     </div>
                 </div>
@@ -528,51 +528,67 @@
                             </p>
                         </div>
 
-                        <!-- 4 Bento Action Prompt Cards -->
+                        <!-- Role-specific Action Prompt Cards -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                            <button @click="sendQuick('Cek lapangan yang tersedia')" 
-                                    class="p-3 bg-[#101814] hover:bg-[#15201a] border border-[#24362d] hover:border-[#10b981]/60 rounded-xl text-left transition-all duration-150 group">
-                                <div class="flex items-center gap-1.5 font-bold text-[#f8fafc] group-hover:text-[#34d399] transition-colors">
-                                    <span>🏟️</span>
-                                    <span>Cek Slot Kosong</span>
-                                </div>
-                                <p class="text-[11px] text-[#64748b] mt-1 line-clamp-1">
-                                    Lihat arena yang tersedia hari ini
-                                </p>
-                            </button>
-
-                            <button @click="sendQuick('Pesan lapangan Garuda Sport besok jam 19:00 selama 2 jam')" 
-                                    class="p-3 bg-[#101814] hover:bg-[#15201a] border border-[#10b981]/30 hover:border-[#10b981] rounded-xl text-left transition-all duration-150 group">
-                                <div class="flex items-center gap-1.5 font-bold text-[#34d399] transition-colors">
-                                    <span>⚡</span>
-                                    <span>Booking via Chat</span>
-                                </div>
-                                <p class="text-[11px] text-[#64748b] mt-1 line-clamp-1">
-                                    Reservasi otomatis tanpa form ribet
-                                </p>
-                            </button>
-
-                            <button @click="sendQuick('Berapa tarif sewa lapangan indoor vs outdoor per jam?')" 
-                                    class="p-3 bg-[#101814] hover:bg-[#15201a] border border-[#24362d] hover:border-[#f59e0b]/60 rounded-xl text-left transition-all duration-150 group">
-                                <div class="flex items-center gap-1.5 font-bold text-[#f8fafc] group-hover:text-[#f59e0b] transition-colors">
-                                    <span>💰</span>
-                                    <span>Tarif & Spesifikasi</span>
-                                </div>
-                                <p class="text-[11px] text-[#64748b] mt-1 line-clamp-1">
-                                    Info rumput sintetis & taraflex vinyl
-                                </p>
-                            </button>
-
-                            <button @click="sendQuick('Cek status booking saya')" 
-                                    class="p-3 bg-[#101814] hover:bg-[#15201a] border border-[#24362d] hover:border-[#38bdf8]/60 rounded-xl text-left transition-all duration-150 group">
-                                <div class="flex items-center gap-1.5 font-bold text-[#f8fafc] group-hover:text-[#38bdf8] transition-colors">
-                                    <span>📋</span>
-                                    <span>Status Reservasi</span>
-                                </div>
-                                <p class="text-[11px] text-[#64748b] mt-1 line-clamp-1">
-                                    Lihat kode tiket & jadwal main tim
-                                </p>
-                            </button>
+                            @if(auth()->user()?->role === 'admin')
+                                <button @click="sendQuick('Ringkasan operasional hari ini')"
+                                        class="p-3 bg-[#101814] hover:bg-[#15201a] border border-[#10b981]/30 hover:border-[#10b981] rounded-xl text-left transition-all duration-150 group">
+                                    <div class="flex items-center gap-1.5 font-bold text-[#34d399] transition-colors">
+                                        <span>📊</span>
+                                        <span>Briefing Hari Ini</span>
+                                    </div>
+                                    <p class="text-[11px] text-[#64748b] mt-1 line-clamp-1">Booking, pending, belum lunas, lapangan aktif</p>
+                                </button>
+                                <button @click="inputMessage = 'Konfirmasi booking #KF-'; $refs.chatInput.focus()"
+                                        class="p-3 bg-[#101814] hover:bg-[#15201a] border border-[#24362d] hover:border-[#38bdf8]/60 rounded-xl text-left transition-all duration-150 group">
+                                    <div class="flex items-center gap-1.5 font-bold text-[#f8fafc] group-hover:text-[#38bdf8] transition-colors">
+                                        <span>✓</span>
+                                        <span>Konfirmasi Booking</span>
+                                    </div>
+                                    <p class="text-[11px] text-[#64748b] mt-1 line-clamp-1">Masukkan nomor tiket, lalu setujui aksi</p>
+                                </button>
+                                <button @click="inputMessage = 'Batalkan booking #KF-'; $refs.chatInput.focus()"
+                                        class="p-3 bg-[#101814] hover:bg-[#15201a] border border-[#24362d] hover:border-[#ef4444]/60 rounded-xl text-left transition-all duration-150 group">
+                                    <div class="flex items-center gap-1.5 font-bold text-[#f8fafc] group-hover:text-[#ef4444] transition-colors">
+                                        <span>×</span>
+                                        <span>Batalkan Booking</span>
+                                    </div>
+                                    <p class="text-[11px] text-[#64748b] mt-1 line-clamp-1">Butuh persetujuan sebelum data berubah</p>
+                                </button>
+                            @else
+                                <button @click="sendQuick('Bantu pilihkan lapangan')"
+                                        class="p-3 bg-[#101814] hover:bg-[#15201a] border border-[#10b981]/30 hover:border-[#10b981] rounded-xl text-left transition-all duration-150 group">
+                                    <div class="flex items-center gap-1.5 font-bold text-[#34d399] transition-colors">
+                                        <span>✨</span>
+                                        <span>Cari Lapangan Cocok</span>
+                                    </div>
+                                    <p class="text-[11px] text-[#64748b] mt-1 line-clamp-1">Jawab tanggal, jam, durasi, dan budget</p>
+                                </button>
+                                <button @click="sendQuick('Cek lapangan yang tersedia')"
+                                        class="p-3 bg-[#101814] hover:bg-[#15201a] border border-[#24362d] hover:border-[#10b981]/60 rounded-xl text-left transition-all duration-150 group">
+                                    <div class="flex items-center gap-1.5 font-bold text-[#f8fafc] group-hover:text-[#34d399] transition-colors">
+                                        <span>🏟️</span>
+                                        <span>Cek Slot Kosong</span>
+                                    </div>
+                                    <p class="text-[11px] text-[#64748b] mt-1 line-clamp-1">Lihat arena yang tersedia hari ini</p>
+                                </button>
+                                <button @click="sendQuick('Pesan lapangan Garuda Sport besok jam 19:00 selama 2 jam')"
+                                        class="p-3 bg-[#101814] hover:bg-[#15201a] border border-[#10b981]/30 hover:border-[#10b981] rounded-xl text-left transition-all duration-150 group">
+                                    <div class="flex items-center gap-1.5 font-bold text-[#34d399] transition-colors">
+                                        <span>⚡</span>
+                                        <span>Booking via Chat</span>
+                                    </div>
+                                    <p class="text-[11px] text-[#64748b] mt-1 line-clamp-1">Reservasi otomatis tanpa form ribet</p>
+                                </button>
+                                <button @click="sendQuick('Cek status booking saya')"
+                                        class="p-3 bg-[#101814] hover:bg-[#15201a] border border-[#24362d] hover:border-[#38bdf8]/60 rounded-xl text-left transition-all duration-150 group">
+                                    <div class="flex items-center gap-1.5 font-bold text-[#f8fafc] group-hover:text-[#38bdf8] transition-colors">
+                                        <span>📋</span>
+                                        <span>Status Reservasi</span>
+                                    </div>
+                                    <p class="text-[11px] text-[#64748b] mt-1 line-clamp-1">Lihat kode tiket & jadwal main tim</p>
+                                </button>
+                            @endif
                         </div>
                     </div>
                 </template>

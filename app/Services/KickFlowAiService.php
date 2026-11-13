@@ -18,8 +18,6 @@ class KickFlowAiService
 
     private string $baseUrl;
 
-    /** System prompt in Bahasa Indonesia for KickFlow Assistant. */
-    private string $systemPrompt = 'Kamu adalah KickFlow Assistant, asisten pemesanan lapangan futsal yang cerdas, ramah, dan solutif. Kamu memiliki kemampuan untuk: (1) mengecek ketersediaan lapangan & jadwal kosong (check_field_availability), (2) menampilkan daftar lapangan & tarif (get_available_fields), (3) mengecek status booking (get_booking_info), (4) MEMBUAT BOOKING LAPANGAN BARU (create_booking) langsung dari percakapan jika diminta pengguna, dan (5) MEMBATALKAN PEMESANAN (cancel_booking) jika diminta pengguna. Selalu jawab dalam Bahasa Indonesia yang sopan dan ramah. Jika pengguna ingin memesan atau membatalkan, gunakan tool yang tersedia!';
 
     public function __construct()
     {
@@ -147,6 +145,8 @@ class KickFlowAiService
      */
     public function chat(string $message, string $sessionId, ?int $userId = null): array
     {
+        $user = $userId ? User::find($userId) : null;
+
         // Load the last 10 messages for conversation history
         $history = ChatLog::where('session_id', $sessionId)
             ->orderBy('created_at', 'asc')
@@ -172,10 +172,18 @@ class KickFlowAiService
         // Save the user message to chat_logs
         $this->saveMessage($sessionId, 'user', $message, $userId);
 
+        $roleAwareReply = $this->handleRoleAwareConversation($message, $sessionId, $user);
+
+        if ($roleAwareReply !== null) {
+            return $roleAwareReply;
+        }
+
+        $systemPrompt = $this->buildSystemPrompt($user);
+
         // Build the initial Gemini API request payload
         $payload = [
             'system_instruction' => [
-                'parts' => [['text' => $this->systemPrompt]],
+                'parts' => [['text' => $systemPrompt]],
             ],
             'contents' => $contents,
             'tools' => $this->buildFunctionTools(),
@@ -242,7 +250,7 @@ class KickFlowAiService
 
             $followUpPayload = [
                 'system_instruction' => [
-                    'parts' => [['text' => $this->systemPrompt]],
+                    'parts' => [['text' => $systemPrompt]],
                 ],
                 'contents' => $followUpContents,
                 'tools' => $this->buildFunctionTools(),
@@ -285,6 +293,307 @@ class KickFlowAiService
         ];
     }
 
+    private function buildSystemPrompt(?User $user): string
+    {
+        $basePrompt = 'Kamu adalah KickFlow Assistant, asisten futsal berbahasa Indonesia. Bantu pengguna dengan jadwal, lapangan, tarif, booking, dan pembatalan. Gunakan tool untuk data atau aksi. Jangan mengarang data. Jawab ringkas, jelas, dan ramah.';
+
+        if ($user?->role === 'admin') {
+            return $basePrompt.' Pengguna adalah admin. Kamu boleh merangkum operasional, tetapi aksi konfirmasi atau pembatalan booking wajib meminta persetujuan eksplisit terlebih dahulu.';
+        }
+
+        return $basePrompt.' Pengguna adalah customer atau tamu. Jangan tampilkan data booking milik pengguna lain atau ringkasan operasional admin. Bantu rekomendasi lapangan dan booking miliknya.';
+    }
+
+    /**
+     * Handle deterministic role-specific flows before using Gemini.
+     *
+     * @return array{reply: string, function_called: string|null}|null
+     */
+    private function handleRoleAwareConversation(string $message, string $sessionId, ?User $user): ?array
+    {
+        $lowerMessage = mb_strtolower(trim($message));
+
+        if (preg_match('/\b(ringkasan|operasional|briefing)\b/', $lowerMessage)) {
+            if ($user?->role !== 'admin') {
+                return $this->replyForRoleFlow(
+                    $sessionId,
+                    'Ringkasan operasional khusus admin. Saya bisa bantu cek jadwal, lapangan, atau booking Anda sendiri.',
+                    $user?->id,
+                    null,
+                );
+            }
+
+            return $this->replyForRoleFlow(
+                $sessionId,
+                $this->adminOperationalSummary(),
+                $user->id,
+                'get_admin_operational_summary',
+            );
+        }
+
+        if ($user?->role === 'admin') {
+            $adminActionReply = $this->handleAdminBookingAction($message, $sessionId, $user);
+
+            if ($adminActionReply !== null) {
+                return $adminActionReply;
+            }
+        }
+
+        if ($user?->role !== 'admin') {
+            return $this->handleBookingRecommendation($message, $sessionId, $user?->id);
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array{reply: string, function_called: string|null}|null
+     */
+    private function handleAdminBookingAction(string $message, string $sessionId, User $admin): ?array
+    {
+        $lowerMessage = mb_strtolower(trim($message));
+        $pendingAction = $this->latestAssistantFlow($sessionId, 'admin_booking_action');
+
+        if ($pendingAction !== null && preg_match('/^(setujui|ya|iya|konfirmasi|lanjutkan)$/', $lowerMessage)) {
+            $booking = Booking::find($pendingAction['booking_id'] ?? null);
+            $action = $pendingAction['action'] ?? null;
+
+            if (! $booking || ! in_array($action, ['confirm', 'cancel'], true)) {
+                return $this->replyForRoleFlow($sessionId, 'Permintaan aksi sudah tidak tersedia. Silakan ulangi perintahnya.', $admin->id, null);
+            }
+
+            if ($action === 'confirm') {
+                if ($booking->status !== 'pending') {
+                    return $this->replyForRoleFlow($sessionId, 'Booking tidak lagi berstatus pending, jadi tidak dapat dikonfirmasi.', $admin->id, null);
+                }
+
+                $booking->update(['status' => 'confirmed']);
+
+                return $this->replyForRoleFlow(
+                    $sessionId,
+                    'Booking #KF-'.str_pad((string) $booking->id, 5, '0', STR_PAD_LEFT).' berhasil dikonfirmasi.',
+                    $admin->id,
+                    'confirm_booking',
+                );
+            }
+
+            if ($booking->status === 'completed' || $booking->status === 'cancelled') {
+                return $this->replyForRoleFlow($sessionId, 'Booking ini tidak dapat dibatalkan pada status saat ini.', $admin->id, null);
+            }
+
+            $booking->update([
+                'status' => 'cancelled',
+                'payment_status' => $booking->payment_status === 'paid' ? 'refunded' : $booking->payment_status,
+            ]);
+
+            return $this->replyForRoleFlow(
+                $sessionId,
+                'Booking #KF-'.str_pad((string) $booking->id, 5, '0', STR_PAD_LEFT).' berhasil dibatalkan.',
+                $admin->id,
+                'cancel_booking',
+            );
+        }
+
+        if (preg_match('/\b(konfirmasi|batalkan|cancel)\b/i', $message) && preg_match('/#?(?:kf-)?(\d+)/i', $message, $matches)) {
+            $action = str_contains($lowerMessage, 'konfirmasi') ? 'confirm' : 'cancel';
+            $booking = Booking::find((int) $matches[1]);
+
+            if (! $booking) {
+                return $this->replyForRoleFlow($sessionId, 'Booking yang diminta tidak ditemukan.', $admin->id, null);
+            }
+
+            $label = $action === 'confirm' ? 'mengonfirmasi' : 'membatalkan';
+
+            return $this->replyForRoleFlow(
+                $sessionId,
+                'Saya akan '.$label.' booking #KF-'.str_pad((string) $booking->id, 5, '0', STR_PAD_LEFT).'. Ketik **Setujui** untuk melanjutkan.',
+                $admin->id,
+                'request_admin_booking_confirmation',
+                ['flow' => 'admin_booking_action', 'action' => $action, 'booking_id' => $booking->id],
+            );
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array{reply: string, function_called: string|null}|null
+     */
+    private function handleBookingRecommendation(string $message, string $sessionId, ?int $userId): ?array
+    {
+        $lowerMessage = mb_strtolower(trim($message));
+        $flow = $this->latestAssistantFlow($sessionId, 'booking_recommendation');
+
+        if ($flow === null && (str_contains($lowerMessage, 'bantu pilihkan') || str_contains($lowerMessage, 'rekomendasi lapangan'))) {
+            return $this->replyForRoleFlow(
+                $sessionId,
+                'Siap. Tanggal bermain kapan? Contoh: hari ini, besok, atau 2026-11-20.',
+                $userId,
+                'start_booking_recommendation',
+                ['flow' => 'booking_recommendation', 'step' => 'date'],
+            );
+        }
+
+        if ($flow === null) {
+            return null;
+        }
+
+        $step = $flow['step'] ?? null;
+        $data = $flow['data'] ?? [];
+
+        if ($step === 'date') {
+            $date = $this->normalizeBookingDate($lowerMessage);
+
+            if ($date === null) {
+                return $this->replyForRoleFlow($sessionId, 'Tanggal belum terbaca. Kirim `hari ini`, `besok`, atau format `YYYY-MM-DD`.', $userId, null, $flow);
+            }
+
+            return $this->replyForRoleFlow(
+                $sessionId,
+                'Jam mulai bermain pukul berapa? Contoh: 19:00.',
+                $userId,
+                'collect_booking_preference',
+                ['flow' => 'booking_recommendation', 'step' => 'time', 'data' => ['date' => $date]],
+            );
+        }
+
+        if ($step === 'time') {
+            if (! preg_match('/^(?:[01]?\d|2[0-3])(?::[0-5]\d)?$/', $lowerMessage)) {
+                return $this->replyForRoleFlow($sessionId, 'Jam belum valid. Kirim format seperti `19:00`.', $userId, null, $flow);
+            }
+
+            $time = strlen($lowerMessage) <= 2 ? sprintf('%02d:00', (int) $lowerMessage) : $lowerMessage;
+
+            return $this->replyForRoleFlow(
+                $sessionId,
+                'Berapa lama bermain? Contoh: 2 jam.',
+                $userId,
+                'collect_booking_preference',
+                ['flow' => 'booking_recommendation', 'step' => 'duration', 'data' => [...$data, 'time' => $time]],
+            );
+        }
+
+        if ($step === 'duration') {
+            if (! preg_match('/\b([1-8])\s*jam\b/', $lowerMessage, $matches)) {
+                return $this->replyForRoleFlow($sessionId, 'Durasi harus 1 sampai 8 jam. Contoh: `2 jam`.', $userId, null, $flow);
+            }
+
+            return $this->replyForRoleFlow(
+                $sessionId,
+                'Budget maksimal per jam berapa? Kirim angka saja, contoh: 200000. Ketik `bebas` bila tidak ada batas.',
+                $userId,
+                'collect_booking_preference',
+                ['flow' => 'booking_recommendation', 'step' => 'budget', 'data' => [...$data, 'duration' => (int) $matches[1]]],
+            );
+        }
+
+        if ($step === 'budget') {
+            $budget = $lowerMessage === 'bebas' ? null : (int) preg_replace('/\D/', '', $lowerMessage);
+
+            if ($budget !== null && $budget <= 0) {
+                return $this->replyForRoleFlow($sessionId, 'Budget belum valid. Kirim angka, misalnya `200000`, atau ketik `bebas`.', $userId, null, $flow);
+            }
+
+            $recommendations = $this->bookingRecommendations($data, $budget);
+
+            return $this->replyForRoleFlow(
+                $sessionId,
+                $recommendations,
+                $userId,
+                'get_booking_recommendations',
+            );
+        }
+
+        return null;
+    }
+
+    /** @return array<string, mixed>|null */
+    private function latestAssistantFlow(string $sessionId, string $flow): ?array
+    {
+        $functionCallData = ChatLog::where('session_id', $sessionId)
+            ->where('role', 'assistant')
+            ->latest('id')
+            ->value('function_call_data');
+
+        if (! is_array($functionCallData) || ($functionCallData['flow'] ?? null) !== $flow) {
+            return null;
+        }
+
+        return $functionCallData;
+    }
+
+    private function normalizeBookingDate(string $message): ?string
+    {
+        if ($message === 'hari ini') {
+            return today()->toDateString();
+        }
+
+        if ($message === 'besok') {
+            return today()->addDay()->toDateString();
+        }
+
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $message)) {
+            return $message;
+        }
+
+        return null;
+    }
+
+    private function bookingRecommendations(array $preferences, ?int $budget): string
+    {
+        $query = Field::query()->where('is_active', true);
+
+        if ($budget !== null) {
+            $query->where('price_per_hour', '<=', $budget);
+        }
+
+        $fields = $query->orderBy('price_per_hour')->get();
+        $date = $preferences['date'] ?? today()->toDateString();
+        $time = $preferences['time'] ?? '19:00';
+        $duration = (int) ($preferences['duration'] ?? 1);
+        $endTime = date('H:i', strtotime($time) + ($duration * 3600));
+
+        $availableFields = $fields->filter(function (Field $field) use ($date, $time, $endTime): bool {
+            return ! Booking::query()
+                ->where('field_id', $field->id)
+                ->whereDate('booking_date', $date)
+                ->where('status', '!=', 'cancelled')
+                ->where('start_time', '<', $endTime)
+                ->where('end_time', '>', $time)
+                ->exists();
+        })->take(3);
+
+        if ($availableFields->isEmpty()) {
+            return 'Belum ada rekomendasi yang cocok untuk '.$date.' pukul '.$time.'. Coba naikkan budget atau ubah jam bermain.';
+        }
+
+        $list = $availableFields->map(fn (Field $field): string => '• **'.$field->name.'** ('.$field->type.') — Rp '.number_format((float) $field->price_per_hour, 0, ',', '.').'/jam')->join("\n");
+
+        return "Rekomendasi untuk {$date}, {$time}-{$endTime}, {$duration} jam:\n\n{$list}\n\nMau booking? Kirim: `Pesan lapangan [nama] {$date} jam {$time} selama {$duration} jam`.";
+    }
+
+    private function adminOperationalSummary(): string
+    {
+        $todayBookings = Booking::whereDate('booking_date', today())->count();
+        $pendingBookings = Booking::where('status', 'pending')->count();
+        $unpaidBookings = Booking::where('payment_status', 'unpaid')->where('status', '!=', 'cancelled')->count();
+        $activeFields = Field::where('is_active', true)->count();
+
+        return "**Ringkasan operasional hari ini**\n• Booking hari ini: {$todayBookings}\n• Menunggu konfirmasi: {$pendingBookings}\n• Belum lunas: {$unpaidBookings}\n• Lapangan aktif: {$activeFields}\n\nKetik `Konfirmasi booking #KF-123` atau `Batalkan booking #KF-123`; saya akan minta persetujuan sebelum mengubah data.";
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $functionCallData
+     * @return array{reply: string, function_called: string|null}
+     */
+    private function replyForRoleFlow(string $sessionId, string $reply, ?int $userId, ?string $functionCalled, ?array $functionCallData = null): array
+    {
+        $metadata = $functionCallData ?? ($functionCalled ? ['function_called' => $functionCalled] : null);
+        $this->saveMessage($sessionId, 'assistant', $reply, $userId, $metadata);
+
+        return ['reply' => $reply, 'function_called' => $functionCalled];
+    }
+
     /**
      * Execute a named function by querying the appropriate Eloquent model or performing mutations.
      */
@@ -293,7 +602,7 @@ class KickFlowAiService
         return match ($functionName) {
             'check_field_availability' => $this->checkFieldAvailability($args),
             'get_available_fields' => $this->getAvailableFields($args),
-            'get_booking_info' => $this->getBookingInfo($args),
+            'get_booking_info' => $this->getBookingInfo($args, $userId),
             'create_booking' => $this->createBooking($args, $userId),
             'cancel_booking' => $this->cancelBooking($args, $userId),
             default => json_encode(['error' => "Function '{$functionName}' tidak dikenal."]),
@@ -393,7 +702,7 @@ class KickFlowAiService
      *
      * @param  array<string, mixed>  $args
      */
-    private function getBookingInfo(array $args): string
+    private function getBookingInfo(array $args, ?int $userId): string
     {
         $bookingId = $args['booking_id'] ?? null;
         $userEmail = $args['user_email'] ?? null;
@@ -402,7 +711,17 @@ class KickFlowAiService
             return json_encode(['error' => 'Harap berikan booking_id atau user_email untuk mencari informasi booking.']);
         }
 
+        $user = $userId ? User::find($userId) : null;
+
+        if (! $user) {
+            return json_encode(['error' => 'Silakan login untuk melihat informasi booking.']);
+        }
+
         $query = Booking::with(['field', 'user']);
+
+        if ($user->role !== 'admin') {
+            $query->where('user_id', $user->id);
+        }
 
         if ($bookingId) {
             $query->where('id', $bookingId);
@@ -737,7 +1056,7 @@ class KickFlowAiService
             $functionCalled = 'get_booking_info';
             $user = User::find($userId);
             if ($user) {
-                $bookingData = json_decode($this->getBookingInfo(['user_email' => $user->email]), true);
+                $bookingData = json_decode($this->getBookingInfo(['user_email' => $user->email], $userId), true);
                 $count = $bookingData['total_bookings'] ?? 0;
                 $reply = "Anda memiliki {$count} riwayat pemesanan di KickFlow. Anda dapat melihat detailnya di menu 'Riwayat Pemesanan'. 📋";
             } else {

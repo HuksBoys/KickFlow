@@ -64,6 +64,8 @@
 - Chat interaktif dengan asisten AI berbasis Google Gemini
 - Rekomendasi lapangan berdasarkan preferensi pengguna
 - Bantuan informasi seputar booking dan fasilitas
+- Customer dapat mengikuti tanya-jawab tanggal, jam, durasi, dan budget untuk rekomendasi lapangan yang tersedia
+- Admin dapat meminta ringkasan operasional harian; konfirmasi atau pembatalan booking via chat wajib melalui persetujuan eksplisit
 
 ### 📊 Dashboard Admin
 - Proteksi akses eksklusif Administrator (Customer dan tamu ditolak)
@@ -347,6 +349,8 @@ KickFlow/
 
 **Perilaku notifikasi:** Bubble notifikasi proaktif chatbot hanya muncul di halaman depan (`/`). Ikon chatbot tetap tersedia di semua halaman.
 
+**Alur peran chatbot:** Customer bisa mengirim `Bantu pilihkan lapangan`, lalu menjawab tanggal, jam, durasi, dan budget. Admin bisa mengirim `Ringkasan operasional hari ini`; untuk aksi booking, kirim `Konfirmasi booking #KF-123` atau `Batalkan booking #KF-123`, lalu ketik `Setujui` setelah chatbot meminta persetujuan.
+
 ---
 
 ## 📜 Log Perubahan & Pembaruan Proyek
@@ -377,6 +381,7 @@ KickFlow/
 | 2026-11-13 / v0.9.4 | [Lead-Agent] | Upload Foto Lapangan di Vercel | Menyimpan upload foto lapangan baru di Vercel Blob saat `BLOB_READ_WRITE_TOKEN` tersedia, mempertahankan fallback storage lokal untuk development, dan merender URL Blob pada halaman publik | `app/Services/VercelBlobService.php`, `app/Http/Controllers/Admin/FieldController.php`, `app/Models/Field.php`, `config/services.php`, `resources/views/fields/*`, `resources/views/welcome.blade.php`, `tests/Feature/*`, `README.md` |
 | 2026-11-13 / v0.9.5 | [Lead-Agent] | Pembatasan Notifikasi Chatbot | Bubble notifikasi proaktif chatbot hanya dirender di halaman depan; ikon chatbot tetap tersedia pada semua halaman, disertai feature test | `resources/views/layouts/app.blade.php`, `tests/Feature/KickFlowBookingAndChatTest.php`, `README.md` |
 | 2026-11-13 / v0.9.6 | [Lead-Agent] | Redirect Login Berdasarkan Role | Login customer selalu menuju halaman depan dan login admin selalu menuju dashboard admin, tanpa memakai URL tujuan lama dari session | `app/Http/Controllers/Auth/LoginController.php`, `tests/Feature/LoginRedirectTest.php`, `README.md` |
+| 2026-11-13 / v0.9.7 | [Lead-Agent] | Chatbot Berdasarkan Role | Customer mendapat rekomendasi lapangan bertahap dari tanggal, jam, durasi, dan budget. Admin mendapat ringkasan operasional dan aksi konfirmasi/pembatalan booking yang wajib menunggu persetujuan eksplisit. Akses data booking customer juga dibatasi ke miliknya sendiri | `app/Services/KickFlowAiService.php`, `tests/Feature/ChatbotRoleTest.php`, `README.md` |
 
 ---
 
