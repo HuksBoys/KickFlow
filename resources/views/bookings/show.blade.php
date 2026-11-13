@@ -110,6 +110,10 @@
             <!-- Price Breakdown -->
             <div class="border-t border-[#1b2922] pt-5 space-y-2 text-xs">
                 <div class="flex justify-between items-center text-[#94a3b8]">
+                    <span>Metode Pembayaran</span>
+                    <span class="font-mono text-[#cbd5e1]">{{ $booking->payment_method === 'qris' ? 'QRIS Midtrans' : 'Bayar di Tempat' }}</span>
+                </div>
+                <div class="flex justify-between items-center text-[#94a3b8]">
                     <span>Biaya Sewa Lapangan ({{ $booking->duration_hours }} jam x Rp {{ number_format($booking->field->price_per_hour ?? 0, 0, ',', '.') }})</span>
                     <span class="font-mono text-[#cbd5e1]">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</span>
                 </div>
@@ -122,6 +126,14 @@
                     <span class="font-mono text-xl text-[#34d399]">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</span>
                 </div>
             </div>
+
+            @if($booking->payment_method === 'qris' && $booking->payment_status === 'unpaid' && $booking->qris_qr_url)
+                <div class="rounded-lg border border-[#10b981]/30 bg-[#0b110e] p-5 text-center">
+                    <h3 class="text-sm font-bold text-[#34d399]">Scan QRIS untuk Membayar</h3>
+                    <p class="mt-1 text-xs text-[#94a3b8]">Status booking otomatis terkonfirmasi setelah Midtrans menerima pembayaran.</p>
+                    <img src="{{ route('bookings.qris-qr', $booking) }}" alt="QRIS pembayaran booking" class="mx-auto mt-4 h-56 w-56 rounded-lg bg-white p-2">
+                </div>
+            @endif
 
             <!-- Actions -->
             <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 border-t border-[#1b2922]">

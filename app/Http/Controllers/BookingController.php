@@ -5,13 +5,17 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreBookingRequest;
 use App\Models\Booking;
 use App\Models\Field;
+use App\Services\MidtransQrisService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use RuntimeException;
 use Illuminate\View\View;
 
 class BookingController extends Controller
 {
+    public function __construct(private readonly MidtransQrisService $midtrans) {}
+
     /**
      * Display a paginated list of the authenticated user's bookings.
      */
@@ -83,7 +87,7 @@ class BookingController extends Controller
 
         $totalPrice = $field->price_per_hour * $durationHours;
 
-        Booking::create([
+        $booking = Booking::create([
             'user_id' => auth()->id(),
             'field_id' => $field->id,
             'booking_date' => $validated['booking_date'],
@@ -93,11 +97,32 @@ class BookingController extends Controller
             'total_price' => $totalPrice,
             'status' => 'pending',
             'payment_status' => 'unpaid',
+            'payment_method' => $validated['payment_method'],
             'notes' => $validated['notes'] ?? null,
         ]);
 
-        return redirect()->route('bookings.index')
-            ->with('success', 'Booking berhasil dibuat! Silakan lanjutkan pembayaran.');
+        if ($booking->payment_method === 'qris') {
+            $booking->load('field', 'user');
+            $booking->update(['midtrans_order_id' => 'KF-QRIS-'.str_pad((string) $booking->id, 5, '0', STR_PAD_LEFT)]);
+
+            try {
+                $payment = $this->midtrans->charge($booking);
+                $booking->update([
+                    'midtrans_transaction_id' => $payment['transaction_id'],
+                    'qris_qr_url' => $payment['qr_url'],
+                ]);
+            } catch (RuntimeException) {
+                $booking->delete();
+
+                return back()->withErrors(['payment_method' => 'QRIS sedang tidak tersedia. Silakan pilih Bayar di Tempat atau coba lagi.'])->withInput();
+            }
+
+            return redirect()->route('bookings.show', $booking)
+                ->with('success', 'Booking dibuat. Scan QRIS untuk pembayaran; status akan dikonfirmasi otomatis setelah pembayaran sukses.');
+        }
+
+        return redirect()->route('bookings.show', $booking)
+            ->with('success', 'Booking berhasil dibuat. Pembayaran dilakukan di tempat.');
     }
 
     /**

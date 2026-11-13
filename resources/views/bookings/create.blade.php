@@ -22,7 +22,8 @@
          x-data="bookingForm({
             fields: {{ json_encode($fields) }},
             selectedFieldId: '{{ old('field_id', $field?->id ?? ($fields->first()?->id ?? '')) }}',
-            duration: {{ old('duration_hours', 1) }}
+            duration: {{ old('duration_hours', 1) }},
+            paymentMethod: '{{ old('payment_method', 'qris') }}'
          })">
         
         <form method="POST" action="{{ route('bookings.store') }}" class="space-y-6">
@@ -124,6 +125,30 @@
                 @enderror
             </div>
 
+            <!-- Payment Method -->
+            <div>
+                <label class="block text-xs font-mono uppercase tracking-wider text-[#94a3b8] mb-2 font-semibold">
+                    Metode Pembayaran <span class="text-[#ef4444]">*</span>
+                </label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <label class="border rounded-lg p-4 cursor-pointer transition-colors"
+                           :class="paymentMethod === 'qris' ? 'border-[#10b981] bg-[#15201a]' : 'border-[#24362d] bg-[#0b110e] hover:border-[#334a3f]'">
+                        <input type="radio" name="payment_method" value="qris" x-model="paymentMethod" class="sr-only">
+                        <span class="block text-sm font-bold text-[#34d399]">QRIS</span>
+                        <span class="block mt-1 text-xs text-[#94a3b8]">Scan QR. Booking otomatis terkonfirmasi setelah pembayaran Midtrans sukses.</span>
+                    </label>
+                    <label class="border rounded-lg p-4 cursor-pointer transition-colors"
+                           :class="paymentMethod === 'cash' ? 'border-[#10b981] bg-[#15201a]' : 'border-[#24362d] bg-[#0b110e] hover:border-[#334a3f]'">
+                        <input type="radio" name="payment_method" value="cash" x-model="paymentMethod" class="sr-only">
+                        <span class="block text-sm font-bold text-[#f8fafc]">Bayar di Tempat</span>
+                        <span class="block mt-1 text-xs text-[#94a3b8]">Bayar ke kasir saat datang. Booking menunggu konfirmasi admin.</span>
+                    </label>
+                </div>
+                @error('payment_method')
+                    <p class="text-xs text-[#ef4444] mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
             <!-- Notes -->
             <div>
                 <label for="notes" class="block text-xs font-mono uppercase tracking-wider text-[#94a3b8] mb-2 font-semibold">
@@ -183,6 +208,7 @@
             fields: config.fields || [],
             selectedFieldId: config.selectedFieldId,
             duration: config.duration,
+            paymentMethod: config.paymentMethod,
 
             getSelectedField() {
                 return this.fields.find(f => f.id == this.selectedFieldId) || this.fields[0] || {};

@@ -55,6 +55,8 @@
 
 ### 💳 Pembayaran & Kasir
 - Proses pembayaran booking lapangan
+- Pembayaran QRIS via Midtrans dengan QR dan konfirmasi booking otomatis hanya setelah webhook pembayaran `settlement` tervalidasi
+- Bayar di Tempat (cash) tetap berstatus pending sampai diproses kasir
 - Modul Kasir (Point of Sale) untuk konfirmasi pesanan pending dan penerimaan bayar lunas langsung
 - Penyelesaian sewa lapangan dan pembatalan otomatis dengan status refund
 - Cetak struk nota resmi pemesanan lapangan (`window.print()`)
@@ -253,11 +255,14 @@ git push origin master
    - `DB_PASSWORD` : Password database
    - `GEMINI_API_KEY` : API Key Google Gemini AI Anda
    - `BLOB_READ_WRITE_TOKEN` : Token Read-Write dari Vercel Blob untuk upload foto lapangan persisten
+   - `MIDTRANS_SERVER_KEY` : Server Key dari Midtrans Dashboard (rahasia; jangan commit)
+   - `MIDTRANS_IS_PRODUCTION` : `false` untuk Sandbox atau `true` untuk Production
 4. **Konfigurasi Vercel Blob untuk foto lapangan**:
    - Buat Blob store bertipe **Public** pada menu **Storage** dan hubungkan ke project KickFlow.
    - Pilih opsi untuk menambahkan Read-Write token ke Environment Variables. Vercel membuat `BLOB_READ_WRITE_TOKEN` otomatis; jangan membuat atau memasukkan token contoh sendiri.
    - Foto lapangan baru disimpan sebagai URL Blob di database MySQL Aiven. Foto lama dengan path lokal `/storage/...` perlu di-upload ulang setelah deploy.
 5. Lakukan **Redeploy** (Deployments -> titik tiga (...) pada deployment terbaru -> **Redeploy**).
+6. Di Midtrans Dashboard, atur Payment Notification URL ke `https://your-project.vercel.app/payments/midtrans/notification`. Endpoint memverifikasi signature Midtrans sebelum menandai QRIS sebagai lunas dan booking terkonfirmasi.
 
 ---
 
@@ -332,8 +337,8 @@ KickFlow/
 2. Klik lapangan yang ingin dipesan untuk melihat detailnya
 3. Pilih **tanggal** dan **jam** yang diinginkan
 4. Klik **"Pesan Sekarang"** dan konfirmasi pemesanan
-5. Lakukan pembayaran sesuai instruksi yang diberikan
-6. Tunggu konfirmasi dari admin
+5. Pilih QRIS untuk menampilkan QR pembayaran; booking otomatis terkonfirmasi setelah pembayaran sukses di Midtrans. Atau pilih Bayar di Tempat untuk membayar ke kasir.
+6. Untuk Bayar di Tempat, tunggu konfirmasi dari admin/kasir
 
 ---
 
@@ -383,6 +388,7 @@ KickFlow/
 | 2026-11-13 / v0.9.6 | [Lead-Agent] | Redirect Login Berdasarkan Role | Login customer selalu menuju halaman depan dan login admin selalu menuju dashboard admin, tanpa memakai URL tujuan lama dari session | `app/Http/Controllers/Auth/LoginController.php`, `tests/Feature/LoginRedirectTest.php`, `README.md` |
 | 2026-11-13 / v0.9.7 | [Lead-Agent] | Chatbot Berdasarkan Role | Customer mendapat rekomendasi lapangan bertahap dari tanggal, jam, durasi, dan budget. Admin mendapat ringkasan operasional dan aksi konfirmasi/pembatalan booking yang wajib menunggu persetujuan eksplisit. Akses data booking customer juga dibatasi ke miliknya sendiri | `app/Services/KickFlowAiService.php`, `tests/Feature/ChatbotRoleTest.php`, `README.md` |
 | 2026-11-13 / v0.9.8 | [Lead-Agent] | Tanya Pendapatan Admin | Pertanyaan natural admin tentang pendapatan, omzet, pemasukan, atau revenue kini menjawab total hari ini dari booking lunas berstatus confirmed/completed tanpa bergantung pada respons Gemini | `app/Services/KickFlowAiService.php`, `tests/Feature/ChatbotRoleTest.php`, `README.md` |
+| 2026-11-13 / v0.9.9 | [Lead-Agent] | QRIS Midtrans dan Bayar di Tempat | Menambahkan pilihan QRIS Midtrans dan Bayar di Tempat. QRIS membuat QR transaksi dan booking baru terkonfirmasi otomatis hanya setelah webhook Midtrans tervalidasi; cash tetap menunggu kasir | `app/Services/MidtransQrisService.php`, `app/Http/Controllers/PaymentCallbackController.php`, `app/Http/Controllers/BookingController.php`, `database/migrations/2026_11_13_083214_add_payment_details_to_bookings_table.php`, `resources/views/bookings/*`, `tests/Feature/MidtransQrisPaymentTest.php`, `README.md` |
 
 ---
 

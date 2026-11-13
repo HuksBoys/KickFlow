@@ -45,4 +45,11 @@ return [
         'token' => env('BLOB_READ_WRITE_TOKEN'),
     ],
 
+    'midtrans' => [
+        'server_key' => env('MIDTRANS_SERVER_KEY'),
+        'base_url' => env('MIDTRANS_IS_PRODUCTION', false)
+            ? 'https://api.midtrans.com'
+            : 'https://api.sandbox.midtrans.com',
+    ],
+
 ];

@@ -19,6 +19,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'total_price',
     'status',
     'payment_status',
+    'payment_method',
+    'midtrans_order_id',
+    'midtrans_transaction_id',
+    'qris_qr_url',
     'notes',
 ])]
 class Booking extends Model

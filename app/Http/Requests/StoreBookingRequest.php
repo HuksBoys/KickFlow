@@ -27,6 +27,7 @@ class StoreBookingRequest extends FormRequest
             'booking_date' => 'required|date|after_or_equal:today',
             'start_time' => 'required|date_format:H:i',
             'duration_hours' => 'required|integer|min:1|max:8',
+            'payment_method' => 'required|in:qris,cash',
             'notes' => 'nullable|string|max:500',
         ];
     }
@@ -48,6 +49,8 @@ class StoreBookingRequest extends FormRequest
             'duration_hours.required' => 'Durasi sewa wajib dipilih.',
             'duration_hours.min' => 'Durasi minimal adalah 1 jam.',
             'duration_hours.max' => 'Durasi maksimal adalah 8 jam.',
+            'payment_method.required' => 'Metode pembayaran wajib dipilih.',
+            'payment_method.in' => 'Metode pembayaran tidak valid.',
         ];
     }
 }

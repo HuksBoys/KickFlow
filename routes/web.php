@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FieldController;
+use App\Http\Controllers\PaymentCallbackController;
 use App\Models\Field;
 use Illuminate\Support\Facades\Route;
 
@@ -35,12 +36,16 @@ Route::post('/logout', [LoginController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
 
+Route::post('/payments/midtrans/notification', [PaymentCallbackController::class, 'midtransNotification'])
+    ->name('payments.midtrans.notification');
+
 // Authenticated customer/admin routes
 Route::middleware('auth')->group(function () {
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
     Route::get('/bookings/create', [BookingController::class, 'create'])->name('bookings.create');
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
     Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+    Route::get('/bookings/{booking}/qris-qr', [PaymentCallbackController::class, 'qrisQr'])->name('bookings.qris-qr');
     Route::patch('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('admin')->name('dashboard');

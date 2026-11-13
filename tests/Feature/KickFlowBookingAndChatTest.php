@@ -82,10 +82,11 @@ class KickFlowBookingAndChatTest extends TestCase
             'booking_date' => $bookingDate,
             'start_time' => '10:00',
             'duration_hours' => 2,
+            'payment_method' => 'cash',
             'notes' => 'Uji coba booking KickFlow',
         ]);
 
-        $response->assertRedirect('/bookings');
+        $response->assertRedirect(route('bookings.show', 1));
         $this->assertDatabaseHas('bookings', [
             'user_id' => $user->id,
             'field_id' => $field->id,
@@ -133,6 +134,7 @@ class KickFlowBookingAndChatTest extends TestCase
             'booking_date' => $bookingDate,
             'start_time' => '14:00',
             'duration_hours' => 1,
+            'payment_method' => 'cash',
         ]);
 
         // Should be rejected with validation error on start_time
