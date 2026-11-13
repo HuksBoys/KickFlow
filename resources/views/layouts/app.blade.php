@@ -375,8 +375,9 @@
     <!-- Floating AI Chatbot Widget (KickFlow Tactical Arena Assistant) -->
     <div x-data="kickflowChatbot()" class="fixed bottom-6 right-6 z-50">
         
-        <!-- Proactive Speech Bubble Notification (Appears when closed) -->
-        <div x-show="!isOpen && showTooltip" 
+        @if(request()->routeIs('home'))
+            <!-- Proactive Speech Bubble Notification (Appears when closed) -->
+            <div x-show="!isOpen && showTooltip"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 translate-y-2 scale-95"
              x-transition:enter-end="opacity-100 translate-y-0 scale-100"
@@ -401,7 +402,8 @@
                 </button>
                 <span class="text-[9px] font-mono text-[#64748b]">Gemini 2.0 Flash</span>
             </div>
-        </div>
+            </div>
+        @endif
 
         <!-- Floating Trigger Capsule (Expandable HUD Button) -->
         <button @click="toggleChat()" 

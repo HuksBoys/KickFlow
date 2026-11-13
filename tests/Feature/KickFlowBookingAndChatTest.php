@@ -31,6 +31,17 @@ class KickFlowBookingAndChatTest extends TestCase
         $response->assertSee('150.000');
     }
 
+    public function test_chatbot_notification_only_appears_on_landing_page(): void
+    {
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Mau cari slot kosong hari ini atau langsung pesan jadwal futsal lewat percakapan AI?');
+
+        $this->get('/fields')
+            ->assertOk()
+            ->assertDontSee('Mau cari slot kosong hari ini atau langsung pesan jadwal futsal lewat percakapan AI?');
+    }
+
     public function test_public_field_pages_render_uploaded_images(): void
     {
         $field = Field::factory()->create([

@@ -26,6 +26,7 @@
 - [Struktur Direktori](#-struktur-direktori)
 - [Panduan Penggunaan](#-panduan-penggunaan)
 - [Log Perubahan](#-log-perubahan--pembaruan-proyek)
+- [Aturan Dokumentasi Perubahan](#-aturan-dokumentasi-perubahan)
 
 ---
 
@@ -36,6 +37,9 @@
 - Autentikasi berbasis peran (Role-Based Access Control / RBAC)
 - Proteksi ketat hak akses rute admin & dashboard melalui middleware `EnsureUserIsAdmin` (403 Forbidden untuk non-admin)
 - Manajemen profil pengguna
+
+### 📚 Dokumentasi Perubahan
+- Setiap perubahan kode, konfigurasi, atau perilaku aplikasi dicatat pada [Log Perubahan](#-log-perubahan--pembaruan-proyek) di README ini.
 
 ### 🏟️ Manajemen Lapangan
 - Tampilan daftar lapangan futsal yang tersedia (Indoor & Outdoor)
@@ -246,7 +250,12 @@ git push origin master
    - `DB_USERNAME` : Username database
    - `DB_PASSWORD` : Password database
    - `GEMINI_API_KEY` : API Key Google Gemini AI Anda
-4. Lakukan **Redeploy** (Deployments -> titik tiga (...) pada deployment terbaru -> **Redeploy**).
+   - `BLOB_READ_WRITE_TOKEN` : Token Read-Write dari Vercel Blob untuk upload foto lapangan persisten
+4. **Konfigurasi Vercel Blob untuk foto lapangan**:
+   - Buat Blob store bertipe **Public** pada menu **Storage** dan hubungkan ke project KickFlow.
+   - Pilih opsi untuk menambahkan Read-Write token ke Environment Variables. Vercel membuat `BLOB_READ_WRITE_TOKEN` otomatis; jangan membuat atau memasukkan token contoh sendiri.
+   - Foto lapangan baru disimpan sebagai URL Blob di database MySQL Aiven. Foto lama dengan path lokal `/storage/...` perlu di-upload ulang setelah deploy.
+5. Lakukan **Redeploy** (Deployments -> titik tiga (...) pada deployment terbaru -> **Redeploy**).
 
 ---
 
@@ -336,6 +345,8 @@ KickFlow/
    - *"Bantu saya booking lapangan untuk 10 orang"*
 4. Asisten AI akan merespons dan memberikan rekomendasi yang relevan
 
+**Perilaku notifikasi:** Bubble notifikasi proaktif chatbot hanya muncul di halaman depan (`/`). Ikon chatbot tetap tersedia di semua halaman.
+
 ---
 
 ## 📜 Log Perubahan & Pembaruan Proyek
@@ -363,8 +374,14 @@ KickFlow/
 | 2026-11-08 14:22 / v0.9.1 | [UI-Agent] & [Lead-Agent] | Upgrade UI/UX Chatbot Taktis "Tactical Arena Dugout" | Peningkatan visual & interaksi chatbot: floating HUD trigger capsule dengan radar sweep, speech bubble proaktif, layar pembuka bento prompt cards, gelembung pesan bergradien kontras tinggi, teleprompter badge hasil kueri database, toggle ukuran jendela terminal (expandable), format teks interaktif, tombol salin pesan & reset percakapan instan | `resources/views/layouts/app.blade.php`, `resources/css/app.css`, `README.md` |
 | 2026-11-08 14:31 / v0.9.2 | [UI-Agent] & [Lead-Agent] | Resolusi Ukuran Layar Chatbot & Eliminasi Redundansi Bar | Perbaikan ukuran jendela popup chatbot agar proporsional di seluruh resolusi layar (`max-h-[calc(100vh-6.5rem)]` sm:w-[390px] h-[520px]) sehingga tombol minimize/tutup selalu terjangkau, penambahan handler `@click.outside` & tombol tutup eksplisit, serta penghapusan bar sugesti horizontal yang redundan | `resources/views/layouts/app.blade.php`, `README.md` |
 | 2026-11-08 14:38 / v0.9.3 | [UI-Agent] & [Lead-Agent] | Peningkatan Kontras & Keterbacaan Gelembung Teks User Chatbot | Mengganti warna teks gelembung pengguna dari warna gelap menjadi teks putih murni (`text-white font-medium`) berlatar hijau emerald (`bg-gradient-to-br from-[#059669] to-[#047857]`) dengan border aksen elektrik agar sangat kontras, tajam, dan mudah dibaca di seluruh layar, serta pembaruan avatar pengguna | `resources/views/layouts/app.blade.php`, `README.md` |
+| 2026-11-13 / v0.9.4 | [Lead-Agent] | Upload Foto Lapangan di Vercel | Menyimpan upload foto lapangan baru di Vercel Blob saat `BLOB_READ_WRITE_TOKEN` tersedia, mempertahankan fallback storage lokal untuk development, dan merender URL Blob pada halaman publik | `app/Services/VercelBlobService.php`, `app/Http/Controllers/Admin/FieldController.php`, `app/Models/Field.php`, `config/services.php`, `resources/views/fields/*`, `resources/views/welcome.blade.php`, `tests/Feature/*`, `README.md` |
+| 2026-11-13 / v0.9.5 | [Lead-Agent] | Pembatasan Notifikasi Chatbot | Bubble notifikasi proaktif chatbot hanya dirender di halaman depan; ikon chatbot tetap tersedia pada semua halaman, disertai feature test | `resources/views/layouts/app.blade.php`, `tests/Feature/KickFlowBookingAndChatTest.php`, `README.md` |
 
 ---
+
+## 📌 Aturan Dokumentasi Perubahan
+
+Setiap perubahan berikutnya wajib memperbarui README ini, minimal pada bagian fitur, konfigurasi/deployment bila terdampak, dan Log Perubahan.
 
 <p align="center">
   Dibuat dengan ❤️ menggunakan <a href="https://laravel.com">Laravel</a> & <a href="https://ai.google.dev/">Google Gemini AI</a>
