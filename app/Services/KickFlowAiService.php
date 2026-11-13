@@ -313,6 +313,15 @@ class KickFlowAiService
     {
         $lowerMessage = mb_strtolower(trim($message));
 
+        if ($user?->role === 'admin' && preg_match('/\b(pendapatan|omzet|pemasukan|revenue)\b/', $lowerMessage)) {
+            return $this->replyForRoleFlow(
+                $sessionId,
+                $this->adminTodayRevenue(),
+                $user->id,
+                'get_admin_today_revenue',
+            );
+        }
+
         if (preg_match('/\b(ringkasan|operasional|briefing)\b/', $lowerMessage)) {
             if ($user?->role !== 'admin') {
                 return $this->replyForRoleFlow(
@@ -580,6 +589,16 @@ class KickFlowAiService
         $activeFields = Field::where('is_active', true)->count();
 
         return "**Ringkasan operasional hari ini**\n• Booking hari ini: {$todayBookings}\n• Menunggu konfirmasi: {$pendingBookings}\n• Belum lunas: {$unpaidBookings}\n• Lapangan aktif: {$activeFields}\n\nKetik `Konfirmasi booking #KF-123` atau `Batalkan booking #KF-123`; saya akan minta persetujuan sebelum mengubah data.";
+    }
+
+    private function adminTodayRevenue(): string
+    {
+        $revenue = Booking::whereDate('booking_date', today())
+            ->whereIn('status', ['confirmed', 'completed'])
+            ->where('payment_status', 'paid')
+            ->sum('total_price');
+
+        return 'Pendapatan hari ini: **Rp '.number_format((float) $revenue, 0, ',', '.').'** dari booking terkonfirmasi atau selesai yang sudah lunas.';
     }
 
     /**

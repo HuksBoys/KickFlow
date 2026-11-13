@@ -35,6 +35,29 @@ class ChatbotRoleTest extends TestCase
             ->assertJsonPath('reply', fn (string $reply): bool => str($reply)->contains('Ringkasan operasional hari ini'));
     }
 
+    public function test_admin_can_request_today_revenue_with_natural_language(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $field = Field::factory()->create();
+        $customer = User::factory()->create();
+        Booking::factory()->create([
+            'user_id' => $customer->id,
+            'field_id' => $field->id,
+            'booking_date' => today(),
+            'status' => 'confirmed',
+            'payment_status' => 'paid',
+            'total_price' => 275000,
+        ]);
+
+        $this->actingAs($admin)->postJson('/api/chat', [
+            'message' => 'Berapa pendapatan harinin?',
+            'session_id' => 'admin-today-revenue',
+        ])
+            ->assertOk()
+            ->assertJsonPath('function_called', 'get_admin_today_revenue')
+            ->assertJsonPath('reply', fn (string $reply): bool => str($reply)->contains('Rp 275.000'));
+    }
+
     public function test_customer_cannot_request_admin_operational_summary(): void
     {
         $customer = User::factory()->create(['role' => 'customer']);

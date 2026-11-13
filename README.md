@@ -349,7 +349,7 @@ KickFlow/
 
 **Perilaku notifikasi:** Bubble notifikasi proaktif chatbot hanya muncul di halaman depan (`/`). Ikon chatbot tetap tersedia di semua halaman.
 
-**Alur peran chatbot:** Customer bisa mengirim `Bantu pilihkan lapangan`, lalu menjawab tanggal, jam, durasi, dan budget. Admin bisa mengirim `Ringkasan operasional hari ini`; untuk aksi booking, kirim `Konfirmasi booking #KF-123` atau `Batalkan booking #KF-123`, lalu ketik `Setujui` setelah chatbot meminta persetujuan.
+**Alur peran chatbot:** Customer bisa mengirim `Bantu pilihkan lapangan`, lalu menjawab tanggal, jam, durasi, dan budget. Admin bisa mengirim `Ringkasan operasional hari ini` atau menanyakan `Berapa pendapatan hari ini?`; untuk aksi booking, kirim `Konfirmasi booking #KF-123` atau `Batalkan booking #KF-123`, lalu ketik `Setujui` setelah chatbot meminta persetujuan.
 
 ---
 
@@ -382,6 +382,7 @@ KickFlow/
 | 2026-11-13 / v0.9.5 | [Lead-Agent] | Pembatasan Notifikasi Chatbot | Bubble notifikasi proaktif chatbot hanya dirender di halaman depan; ikon chatbot tetap tersedia pada semua halaman, disertai feature test | `resources/views/layouts/app.blade.php`, `tests/Feature/KickFlowBookingAndChatTest.php`, `README.md` |
 | 2026-11-13 / v0.9.6 | [Lead-Agent] | Redirect Login Berdasarkan Role | Login customer selalu menuju halaman depan dan login admin selalu menuju dashboard admin, tanpa memakai URL tujuan lama dari session | `app/Http/Controllers/Auth/LoginController.php`, `tests/Feature/LoginRedirectTest.php`, `README.md` |
 | 2026-11-13 / v0.9.7 | [Lead-Agent] | Chatbot Berdasarkan Role | Customer mendapat rekomendasi lapangan bertahap dari tanggal, jam, durasi, dan budget. Admin mendapat ringkasan operasional dan aksi konfirmasi/pembatalan booking yang wajib menunggu persetujuan eksplisit. Akses data booking customer juga dibatasi ke miliknya sendiri | `app/Services/KickFlowAiService.php`, `tests/Feature/ChatbotRoleTest.php`, `README.md` |
+| 2026-11-13 / v0.9.8 | [Lead-Agent] | Tanya Pendapatan Admin | Pertanyaan natural admin tentang pendapatan, omzet, pemasukan, atau revenue kini menjawab total hari ini dari booking lunas berstatus confirmed/completed tanpa bergantung pada respons Gemini | `app/Services/KickFlowAiService.php`, `tests/Feature/ChatbotRoleTest.php`, `README.md` |
 
 ---
 
