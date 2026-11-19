@@ -246,7 +246,7 @@ git push origin master
    - `APP_ENV` : `production`
    - `APP_DEBUG` : `false`
    - `APP_KEY` : `base64:Emdso5jnrv6Sqf7pxzFF3bflfC09tmKXuNAwj/3Wk2Y=` *(atau gunakan hasil `php artisan key:generate --show`)*
-   - `APP_URL` : `https://your-project.vercel.app` *(sesuaikan domain Vercel Anda)*
+   - `APP_URL` : `https://your-project.vercel.app` *(wajib HTTPS dan sesuai domain Vercel production; jangan gunakan `http://` atau `localhost`)*
    - `DB_CONNECTION` : `mysql`
    - `DB_HOST` : Host cloud database Anda
    - `DB_PORT` : `3306`
@@ -389,6 +389,7 @@ KickFlow/
 | 2026-11-13 / v0.9.7 | [Lead-Agent] | Chatbot Berdasarkan Role | Customer mendapat rekomendasi lapangan bertahap dari tanggal, jam, durasi, dan budget. Admin mendapat ringkasan operasional dan aksi konfirmasi/pembatalan booking yang wajib menunggu persetujuan eksplisit. Akses data booking customer juga dibatasi ke miliknya sendiri | `app/Services/KickFlowAiService.php`, `tests/Feature/ChatbotRoleTest.php`, `README.md` |
 | 2026-11-13 / v0.9.8 | [Lead-Agent] | Tanya Pendapatan Admin | Pertanyaan natural admin tentang pendapatan, omzet, pemasukan, atau revenue kini menjawab total hari ini dari booking lunas berstatus confirmed/completed tanpa bergantung pada respons Gemini | `app/Services/KickFlowAiService.php`, `tests/Feature/ChatbotRoleTest.php`, `README.md` |
 | 2026-11-13 / v0.9.9 | [Lead-Agent] | QRIS Midtrans dan Bayar di Tempat | Menambahkan pilihan QRIS Midtrans dan Bayar di Tempat. QRIS membuat QR transaksi dan booking baru terkonfirmasi otomatis hanya setelah webhook Midtrans tervalidasi; cash tetap menunggu kasir | `app/Services/MidtransQrisService.php`, `app/Http/Controllers/PaymentCallbackController.php`, `app/Http/Controllers/BookingController.php`, `database/migrations/2026_11_13_083214_add_payment_details_to_bookings_table.php`, `resources/views/bookings/*`, `tests/Feature/MidtransQrisPaymentTest.php`, `README.md` |
+| 2026-11-13 / v0.9.10 | [Lead-Agent] | URL Form HTTPS Vercel | Memaksa URL Laravel memakai HTTPS pada production agar action formulir tidak dibuat sebagai `http://` ketika runtime serverless berada di belakang proxy Vercel | `app/Providers/AppServiceProvider.php`, `tests/Feature/SecureUrlGenerationTest.php`, `README.md` |
 
 ---
 
