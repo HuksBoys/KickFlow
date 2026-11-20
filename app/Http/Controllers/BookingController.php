@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreBookingRequest;
+use App\Models\Addon;
 use App\Models\Booking;
 use App\Models\Field;
 use App\Services\MidtransQrisService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use RuntimeException;
 use Illuminate\View\View;
@@ -43,12 +45,14 @@ class BookingController extends Controller
         }
 
         $fields = Field::where('is_active', true)->get();
+        $addons = Addon::where('is_active', true)->orderBy('name')->get();
 
         return view('bookings.create', [
             'field' => $field,
             'fields' => $fields,
             'date' => $request->input('date'),
             'startTime' => $request->input('start_time'),
+            'addons' => $addons,
         ]);
     }
 
@@ -85,24 +89,49 @@ class BookingController extends Controller
             return back()->withErrors(['start_time' => 'Lapangan sudah dipesan pada waktu tersebut.'])->withInput();
         }
 
-        $totalPrice = $field->price_per_hour * $durationHours;
+        $selectedAddons = collect($validated['addons'] ?? [])
+            ->map(fn (int $quantity): int => $quantity)
+            ->filter(fn (int $quantity): bool => $quantity > 0);
+        $addons = Addon::where('is_active', true)
+            ->whereIn('id', $selectedAddons->keys())
+            ->get()
+            ->keyBy('id');
 
-        $booking = Booking::create([
-            'user_id' => auth()->id(),
-            'field_id' => $field->id,
-            'booking_date' => $validated['booking_date'],
-            'start_time' => $startTime,
-            'end_time' => $endTime,
-            'duration_hours' => $durationHours,
-            'total_price' => $totalPrice,
-            'status' => 'pending',
-            'payment_status' => 'unpaid',
-            'payment_method' => $validated['payment_method'],
-            'notes' => $validated['notes'] ?? null,
-        ]);
+        if ($selectedAddons->count() !== $addons->count()) {
+            return back()->withErrors(['addons' => 'Satu atau lebih item tambahan tidak tersedia.'])->withInput();
+        }
+
+        $totalPrice = ($field->price_per_hour * $durationHours) + $addons->sum(
+            fn (Addon $addon): float => $addon->price * $selectedAddons->get($addon->id)
+        );
+
+        $booking = DB::transaction(function () use ($addons, $durationHours, $endTime, $field, $selectedAddons, $startTime, $totalPrice, $validated): Booking {
+            $booking = Booking::create([
+                'user_id' => auth()->id(),
+                'field_id' => $field->id,
+                'booking_date' => $validated['booking_date'],
+                'start_time' => $startTime,
+                'end_time' => $endTime,
+                'duration_hours' => $durationHours,
+                'total_price' => $totalPrice,
+                'status' => 'pending',
+                'payment_status' => 'unpaid',
+                'payment_method' => $validated['payment_method'],
+                'notes' => $validated['notes'] ?? null,
+            ]);
+
+            $booking->addons()->attach($addons->mapWithKeys(
+                fn (Addon $addon): array => [$addon->id => [
+                    'quantity' => $selectedAddons->get($addon->id),
+                    'unit_price' => $addon->price,
+                ]]
+            )->all());
+
+            return $booking;
+        });
 
         if ($booking->payment_method === 'qris') {
-            $booking->load('field', 'user');
+            $booking->load('addons', 'field', 'user');
             $booking->update(['midtrans_order_id' => 'KF-QRIS-'.str_pad((string) $booking->id, 5, '0', STR_PAD_LEFT)]);
 
             try {
@@ -132,7 +161,7 @@ class BookingController extends Controller
     {
         Gate::authorize('view', $booking);
 
-        $booking->load('field', 'user');
+        $booking->load('addons', 'field', 'user');
 
         return view('bookings.show', compact('booking'));
     }

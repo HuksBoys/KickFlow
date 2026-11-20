@@ -219,8 +219,14 @@
             <div class="bg-[#0b110e] rounded-lg p-4 border border-[#1b2922] space-y-2 text-xs">
                 <div class="flex justify-between items-center text-[#94a3b8]">
                     <span>Sewa {{ $booking->field->name ?? 'Lapangan' }} ({{ $booking->duration_hours }} jam × Rp {{ number_format($booking->field->price_per_hour ?? 0, 0, ',', '.') }})</span>
-                    <span class="font-mono font-semibold text-[#f8fafc]">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</span>
+                    <span class="font-mono font-semibold text-[#f8fafc]">Rp {{ number_format(($booking->field->price_per_hour ?? 0) * $booking->duration_hours, 0, ',', '.') }}</span>
                 </div>
+                @foreach($booking->addons as $addon)
+                    <div class="flex justify-between items-center text-[#94a3b8]">
+                        <span>{{ $addon->name }} ({{ $addon->pivot->quantity }} × Rp {{ number_format($addon->pivot->unit_price, 0, ',', '.') }})</span>
+                        <span class="font-mono font-semibold text-[#f8fafc]">Rp {{ number_format($addon->pivot->quantity * $addon->pivot->unit_price, 0, ',', '.') }}</span>
+                    </div>
+                @endforeach
                 <div class="flex justify-between items-center text-[#94a3b8]">
                     <span>Biaya Layanan & Administrasi</span>
                     <span class="font-mono text-[#34d399] font-medium">GRATIS (Rp 0)</span>

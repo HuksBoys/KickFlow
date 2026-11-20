@@ -146,6 +146,10 @@
                                    class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('admin.fields.*') ? 'bg-[#15201a] text-[#10b981] font-semibold border border-[#24362d]' : 'text-[#94a3b8] hover:text-[#10b981] hover:bg-[#101814]' }}">
                                     Kelola Lapangan
                                 </a>
+                                <a href="{{ route('admin.addons.index') }}"
+                                   class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('admin.addons.*') ? 'bg-[#15201a] text-[#10b981] font-semibold border border-[#24362d]' : 'text-[#94a3b8] hover:text-[#10b981] hover:bg-[#101814]' }}">
+                                    Item Tambahan
+                                </a>
                                 <a href="{{ route('admin.cashier.index') }}" 
                                    class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('admin.cashier.*') ? 'bg-[#15201a] text-[#f59e0b] font-semibold border border-[#24362d]' : 'text-[#94a3b8] hover:text-[#f59e0b] hover:bg-[#101814]' }}">
                                     Kasir
@@ -199,6 +203,7 @@
                                     <div class="py-1">
                                         <a href="{{ route('dashboard') }}" class="block px-3 py-1.5 text-xs text-[#94a3b8] hover:text-[#38bdf8] hover:bg-[#15201a]">Dashboard Admin</a>
                                         <a href="{{ route('admin.fields.index') }}" class="block px-3 py-1.5 text-xs text-[#94a3b8] hover:text-[#10b981] hover:bg-[#15201a]">Kelola Lapangan</a>
+                                        <a href="{{ route('admin.addons.index') }}" class="block px-3 py-1.5 text-xs text-[#94a3b8] hover:text-[#10b981] hover:bg-[#15201a]">Item Tambahan</a>
                                         <a href="{{ route('admin.cashier.index') }}" class="block px-3 py-1.5 text-xs text-[#94a3b8] hover:text-[#f59e0b] hover:bg-[#15201a]">Kasir & Konfirmasi</a>
                                     </div>
                                     <div class="h-px bg-[#1b2922]"></div>
@@ -245,6 +250,7 @@
                     <div class="h-px bg-[#1b2922] my-1"></div>
                     <a href="{{ route('dashboard') }}" class="block px-3 py-2 rounded-lg text-sm font-medium text-[#38bdf8] hover:bg-[#101814]">Dashboard Admin</a>
                     <a href="{{ route('admin.fields.index') }}" class="block px-3 py-2 rounded-lg text-sm font-medium text-[#10b981] hover:bg-[#101814]">Kelola Lapangan</a>
+                    <a href="{{ route('admin.addons.index') }}" class="block px-3 py-2 rounded-lg text-sm font-medium text-[#10b981] hover:bg-[#101814]">Item Tambahan</a>
                     <a href="{{ route('admin.cashier.index') }}" class="block px-3 py-2 rounded-lg text-sm font-medium text-[#f59e0b] hover:bg-[#101814]">Kasir & Konfirmasi</a>
                 @endif
                 <div class="h-px bg-[#1b2922] my-1"></div>

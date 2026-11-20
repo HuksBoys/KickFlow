@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\CashierController;
+use App\Http\Controllers\Admin\AddonController;
 use App\Http\Controllers\Admin\FieldController as AdminFieldController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Auth\LoginController;
@@ -53,6 +54,8 @@ Route::middleware('auth')->group(function () {
 
 // Admin routes (auth + admin role)
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('addons', AddonController::class)->except(['show', 'destroy']);
+
     // Field Management (Tambah Lapangan)
     Route::get('/fields', [AdminFieldController::class, 'index'])->name('fields.index');
     Route::get('/fields/create', [AdminFieldController::class, 'create'])->name('fields.create');

@@ -29,6 +29,8 @@ class StoreBookingRequest extends FormRequest
             'duration_hours' => 'required|integer|min:1|max:8',
             'payment_method' => 'required|in:qris,cash',
             'notes' => 'nullable|string|max:500',
+            'addons' => 'nullable|array',
+            'addons.*' => 'nullable|integer|min:0|max:99',
         ];
     }
 
@@ -51,6 +53,10 @@ class StoreBookingRequest extends FormRequest
             'duration_hours.max' => 'Durasi maksimal adalah 8 jam.',
             'payment_method.required' => 'Metode pembayaran wajib dipilih.',
             'payment_method.in' => 'Metode pembayaran tidak valid.',
+            'addons.array' => 'Item tambahan tidak valid.',
+            'addons.*.integer' => 'Jumlah item tambahan harus berupa angka.',
+            'addons.*.min' => 'Jumlah item tambahan tidak boleh negatif.',
+            'addons.*.max' => 'Jumlah item tambahan maksimal 99.',
         ];
     }
 }

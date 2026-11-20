@@ -115,8 +115,14 @@
                 </div>
                 <div class="flex justify-between items-center text-[#94a3b8]">
                     <span>Biaya Sewa Lapangan ({{ $booking->duration_hours }} jam x Rp {{ number_format($booking->field->price_per_hour ?? 0, 0, ',', '.') }})</span>
-                    <span class="font-mono text-[#cbd5e1]">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</span>
+                    <span class="font-mono text-[#cbd5e1]">Rp {{ number_format(($booking->field->price_per_hour ?? 0) * $booking->duration_hours, 0, ',', '.') }}</span>
                 </div>
+                @foreach($booking->addons as $addon)
+                    <div class="flex justify-between items-center text-[#94a3b8]">
+                        <span>{{ $addon->name }} ({{ $addon->pivot->quantity }} x Rp {{ number_format($addon->pivot->unit_price, 0, ',', '.') }})</span>
+                        <span class="font-mono text-[#cbd5e1]">Rp {{ number_format($addon->pivot->quantity * $addon->pivot->unit_price, 0, ',', '.') }}</span>
+                    </div>
+                @endforeach
                 <div class="flex justify-between items-center text-[#94a3b8]">
                     <span>Biaya Platform & Layanan</span>
                     <span class="font-mono text-[#34d399] font-medium">Gratis</span>

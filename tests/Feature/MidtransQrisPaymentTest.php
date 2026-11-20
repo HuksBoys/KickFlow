@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Addon;
 use App\Models\Booking;
 use App\Models\Field;
 use App\Models\User;
@@ -21,6 +22,11 @@ class MidtransQrisPaymentTest extends TestCase
         Http::fake([
             'https://api.sandbox.midtrans.com/v2/charge' => function (HttpRequest $request): array {
                 $this->assertSame('qris', $request->data()['payment_type']);
+                $this->assertSame(220000, $request->data()['transaction_details']['gross_amount']);
+                $this->assertSame([
+                    ['id' => 'booking-1', 'price' => 200000, 'quantity' => 1, 'name' => 'Booking Arena Test'],
+                    ['id' => 'addon-1', 'price' => 10000, 'quantity' => 2, 'name' => 'Rompi Tim'],
+                ], $request->data()['item_details']);
 
                 return [
                     'status_code' => '201',
@@ -33,7 +39,8 @@ class MidtransQrisPaymentTest extends TestCase
             },
         ]);
         $customer = User::factory()->create();
-        $field = Field::factory()->create(['price_per_hour' => 100000, 'is_active' => true]);
+        $field = Field::factory()->create(['name' => 'Arena Test', 'price_per_hour' => 100000, 'is_active' => true]);
+        $vest = Addon::factory()->create(['name' => 'Rompi Tim', 'price' => 10000]);
 
         $response = $this->actingAs($customer)->post('/bookings', [
             'field_id' => $field->id,
@@ -41,12 +48,14 @@ class MidtransQrisPaymentTest extends TestCase
             'start_time' => '19:00',
             'duration_hours' => 2,
             'payment_method' => 'qris',
+            'addons' => [$vest->id => 2],
         ]);
 
         $booking = Booking::firstOrFail();
 
         $response->assertRedirect(route('bookings.show', $booking));
         $this->assertSame('qris', $booking->payment_method);
+        $this->assertSame('220000.00', $booking->total_price);
         $this->assertSame('unpaid', $booking->payment_status);
         $this->assertSame('midtrans-transaction-id', $booking->midtrans_transaction_id);
         $this->assertSame('https://api.sandbox.midtrans.com/v2/qris/midtrans-transaction-id/qr-code', $booking->qris_qr_url);

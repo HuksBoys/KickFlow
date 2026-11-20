@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 #[Fillable([
     'user_id',
@@ -72,5 +73,15 @@ class Booking extends Model
     public function schedule(): BelongsTo
     {
         return $this->belongsTo(Schedule::class);
+    }
+
+    /**
+     * @return BelongsToMany<Addon, $this>
+     */
+    public function addons(): BelongsToMany
+    {
+        return $this->belongsToMany(Addon::class)
+            ->withPivot(['quantity', 'unit_price'])
+            ->withTimestamps();
     }
 }

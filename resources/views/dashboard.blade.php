@@ -34,6 +34,10 @@
                class="px-3.5 py-2 bg-[#15201a] hover:bg-[#1b2922] border border-[#24362d] text-[#cbd5e1] text-xs font-medium rounded-lg transition-colors">
                 Kelola Lapangan
             </a>
+            <a href="{{ route('admin.addons.index') }}"
+               class="px-3.5 py-2 bg-[#15201a] hover:bg-[#1b2922] border border-[#24362d] text-[#cbd5e1] text-xs font-medium rounded-lg transition-colors">
+                Item Tambahan
+            </a>
             <a href="{{ route('home') }}" 
                class="px-3 py-2 bg-[#101814] hover:bg-[#15201a] border border-[#24362d] text-[#64748b] hover:text-[#f8fafc] text-xs font-medium rounded-lg transition-colors">
                 Halaman Depan

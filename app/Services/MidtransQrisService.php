@@ -28,12 +28,20 @@ class MidtransQrisService
                 'order_id' => $booking->midtrans_order_id,
                 'gross_amount' => (int) $booking->total_price,
             ],
-            'item_details' => [[
-                'id' => 'booking-'.$booking->id,
-                'price' => (int) $booking->total_price,
-                'quantity' => 1,
-                'name' => 'Booking '.$booking->field->name,
-            ]],
+            'item_details' => [
+                [
+                    'id' => 'booking-'.$booking->id,
+                    'price' => (int) ($booking->field->price_per_hour * $booking->duration_hours),
+                    'quantity' => 1,
+                    'name' => 'Booking '.$booking->field->name,
+                ],
+                ...$booking->addons->map(fn ($addon): array => [
+                    'id' => 'addon-'.$addon->id,
+                    'price' => (int) $addon->pivot->unit_price,
+                    'quantity' => $addon->pivot->quantity,
+                    'name' => $addon->name,
+                ])->all(),
+            ],
             'customer_details' => [
                 'first_name' => $booking->user->name,
                 'email' => $booking->user->email,

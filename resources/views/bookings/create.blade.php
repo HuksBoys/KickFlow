@@ -23,7 +23,9 @@
             fields: {{ json_encode($fields) }},
             selectedFieldId: '{{ old('field_id', $field?->id ?? ($fields->first()?->id ?? '')) }}',
             duration: {{ old('duration_hours', 1) }},
-            paymentMethod: '{{ old('payment_method', 'qris') }}'
+            paymentMethod: '{{ old('payment_method', 'qris') }}',
+            addons: {{ json_encode($addons) }},
+            addonQuantities: {{ json_encode(old('addons', [])) }}
          })">
         
         <form method="POST" action="{{ route('bookings.store') }}" class="space-y-6">
@@ -125,6 +127,41 @@
                 @enderror
             </div>
 
+            <!-- Booking Add-ons -->
+            @if($addons->isNotEmpty())
+                <div>
+                    <div class="flex items-end justify-between gap-4 mb-2">
+                        <div>
+                            <label class="block text-xs font-mono uppercase tracking-wider text-[#94a3b8] font-semibold">Item Tambahan</label>
+                            <p class="mt-1 text-xs text-[#64748b]">Opsional. Jumlah dan harga masuk ke total booking.</p>
+                        </div>
+                    </div>
+                    <div class="divide-y divide-[#1b2922] rounded-lg border border-[#24362d] bg-[#0b110e]">
+                        @foreach($addons as $addon)
+                            <div class="flex items-center justify-between gap-4 p-3.5">
+                                <div>
+                                    <p class="text-sm font-semibold text-[#f8fafc]">{{ $addon->name }}</p>
+                                    <p class="mt-0.5 text-xs font-mono text-[#34d399]">Rp {{ number_format($addon->price, 0, ',', '.') }} / item</p>
+                                </div>
+                                <label class="flex items-center gap-2 text-xs text-[#94a3b8]" for="addon_{{ $addon->id }}">
+                                    Jumlah
+                                    <input type="number"
+                                           id="addon_{{ $addon->id }}"
+                                           name="addons[{{ $addon->id }}]"
+                                           min="0"
+                                           max="99"
+                                           x-model.number="addonQuantities[{{ $addon->id }}]"
+                                           class="w-16 rounded-md border border-[#24362d] bg-[#15201a] px-2 py-1.5 text-center font-mono text-sm text-[#f8fafc] focus:border-[#10b981] focus:outline-none">
+                                </label>
+                            </div>
+                        @endforeach
+                    </div>
+                    @error('addons')
+                        <p class="mt-1 text-xs text-[#ef4444]">{{ $message }}</p>
+                    @enderror
+                </div>
+            @endif
+
             <!-- Payment Method -->
             <div>
                 <label class="block text-xs font-mono uppercase tracking-wider text-[#94a3b8] mb-2 font-semibold">
@@ -174,6 +211,12 @@
                     <span>Durasi Pertandingan</span>
                     <span class="font-mono text-[#cbd5e1]" x-text="duration + ' Jam'"></span>
                 </div>
+                <template x-if="getAddonTotal() > 0">
+                    <div class="flex justify-between items-center text-xs text-[#94a3b8]">
+                        <span>Item Tambahan</span>
+                        <span class="font-mono text-[#cbd5e1]" x-text="'Rp ' + getAddonTotal().toLocaleString('id-ID')"></span>
+                    </div>
+                </template>
                 <div class="h-px bg-[#1b2922] my-2"></div>
                 <div class="flex justify-between items-center">
                     <span class="text-xs font-bold uppercase tracking-wider text-[#f8fafc]">Total Biaya Reservasi</span>
@@ -209,6 +252,8 @@
             selectedFieldId: config.selectedFieldId,
             duration: config.duration,
             paymentMethod: config.paymentMethod,
+            addons: config.addons || [],
+            addonQuantities: config.addonQuantities || {},
 
             getSelectedField() {
                 return this.fields.find(f => f.id == this.selectedFieldId) || this.fields[0] || {};
@@ -220,7 +265,11 @@
             },
 
             getTotalPrice() {
-                return this.getPricePerHour() * Number(this.duration || 1);
+                return (this.getPricePerHour() * Number(this.duration || 1)) + this.getAddonTotal();
+            },
+
+            getAddonTotal() {
+                return this.addons.reduce((total, addon) => total + (Number(addon.price || 0) * Number(this.addonQuantities[addon.id] || 0)), 0);
             }
         }
     }

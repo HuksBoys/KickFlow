@@ -76,7 +76,7 @@ class CashierController extends Controller
      */
     public function show(Booking $booking): View
     {
-        $booking->load(['user', 'field']);
+        $booking->load(['addons', 'user', 'field']);
 
         return view('admin.cashier.show', compact('booking'));
     }
