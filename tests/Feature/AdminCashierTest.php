@@ -60,6 +60,21 @@ class AdminCashierTest extends TestCase
         $response->assertSee('200.000');
     }
 
+    public function test_cashier_shows_separate_status_queues_with_counts(): void
+    {
+        $admin = User::factory()->admin()->create();
+        Booking::factory()->create(['status' => 'pending']);
+        Booking::factory()->create(['status' => 'confirmed']);
+        Booking::factory()->create(['status' => 'cancelled']);
+
+        $response = $this->actingAs($admin)->get('/admin/cashier');
+
+        $response->assertOk();
+        $response->assertSee('aria-label="Lihat 1 pesanan pending"', false);
+        $response->assertSee('aria-label="Lihat 1 pesanan confirmed"', false);
+        $response->assertSee('aria-label="Lihat 1 pesanan cancelled"', false);
+    }
+
     /**
      * Test admin can view booking receipt / detail page in cashier.
      */

@@ -17,11 +17,6 @@ class CashierController extends Controller
     {
         $query = Booking::with(['user', 'field']);
 
-        // Filter by status
-        if ($request->filled('status') && $request->status !== 'semua') {
-            $query->where('status', $request->status);
-        }
-
         // Filter by payment status
         if ($request->filled('payment') && $request->payment !== 'semua') {
             $query->where('payment_status', $request->payment);
@@ -44,6 +39,16 @@ class CashierController extends Controller
             });
         }
 
+        $statusCounts = (clone $query)
+            ->selectRaw('status, count(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status');
+
+        // Filter by status after calculating all queue totals for the active filters.
+        if ($request->filled('status') && $request->status !== 'semua') {
+            $query->where('status', $request->status);
+        }
+
         $bookings = $query->orderByDesc('created_at')
             ->orderByDesc('id')
             ->paginate(15)
@@ -64,6 +69,7 @@ class CashierController extends Controller
 
         return view('admin.cashier.index', compact(
             'bookings',
+            'statusCounts',
             'pendingCount',
             'confirmedTodayCount',
             'unpaidCount',

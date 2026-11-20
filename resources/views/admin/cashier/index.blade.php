@@ -165,11 +165,30 @@
         </form>
     </div>
 
+    @php($queueFilters = request()->except(['status', 'page']))
+    <nav aria-label="Antrean status pesanan" class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+        @foreach([
+            'semua' => ['Semua', $bookings->total(), 'text-[#f8fafc]', 'border-[#334a3f]'],
+            'pending' => ['Pending', $statusCounts['pending'] ?? 0, 'text-[#f59e0b]', 'border-[#f59e0b]/40'],
+            'confirmed' => ['Confirmed', $statusCounts['confirmed'] ?? 0, 'text-[#38bdf8]', 'border-[#38bdf8]/40'],
+            'completed' => ['Selesai', $statusCounts['completed'] ?? 0, 'text-[#34d399]', 'border-[#10b981]/40'],
+            'cancelled' => ['Cancelled', $statusCounts['cancelled'] ?? 0, 'text-[#fca5a5]', 'border-[#ef4444]/40'],
+        ] as $status => [$label, $count, $textClass, $borderClass])
+            <a href="{{ route('admin.cashier.index', $status === 'semua' ? $queueFilters : [...$queueFilters, 'status' => $status]) }}"
+               aria-label="Lihat {{ $count }} pesanan {{ $status }}"
+               @if((request('status', 'semua') === $status)) aria-current="page" @endif
+               class="rounded-lg border p-3 transition-colors {{ request('status', 'semua') === $status ? "bg-[#15201a] {$borderClass}" : 'bg-[#101814] border-[#24362d] hover:bg-[#15201a]' }}">
+                <span class="block text-[10px] font-mono uppercase tracking-wider text-[#64748b]">{{ $label }}</span>
+                <span class="mt-1 block font-mono text-xl font-bold {{ $textClass }}">{{ $count }}</span>
+            </a>
+        @endforeach
+    </nav>
+
     <!-- Bookings Cashier Table -->
     <div class="bg-[#101814] rounded-xl border border-[#24362d] overflow-hidden text-[#f8fafc]">
         <div class="p-4 sm:p-5 border-b border-[#1b2922] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-                <h3 class="font-display text-sm font-bold text-[#f8fafc]">Daftar Pesanan & Antrean Kasir ({{ $bookings->total() }})</h3>
+                <h3 class="font-display text-sm font-bold text-[#f8fafc]">Antrean {{ request('status', 'semua') === 'semua' ? 'Semua Pesanan' : ucfirst(request('status')) }} ({{ $bookings->total() }})</h3>
                 <p class="text-xs text-[#94a3b8]">Klik aksi untuk memvalidasi jadwal, bayar kasir, atau cetak nota</p>
             </div>
         </div>
