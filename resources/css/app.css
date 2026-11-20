@@ -93,6 +93,9 @@
 
     html,
     body {
+        display: block !important;
+        min-height: 0 !important;
+        height: auto !important;
         background: #fff !important;
         color: #111 !important;
     }
@@ -103,6 +106,8 @@
 
     body > main {
         display: block !important;
+        flex: none !important;
+        min-height: 0 !important;
     }
 
     main > :not(.print-container),
@@ -120,6 +125,8 @@
 
     .print-receipt {
         display: block !important;
+        break-after: avoid-page !important;
+        page-break-after: avoid !important;
         background: #fff !important;
         color: #111 !important;
         border: 0 !important;

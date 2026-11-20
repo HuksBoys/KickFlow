@@ -78,6 +78,14 @@ class AdminCashierTest extends TestCase
         $response->assertSee('print-receipt', false);
     }
 
+    public function test_print_styles_remove_main_layout_height_after_receipt(): void
+    {
+        $styles = file_get_contents(resource_path('css/app.css'));
+
+        $this->assertMatchesRegularExpression('/body > main\s*\{\s*display: block !important;\s*flex: none !important;/', $styles);
+        $this->assertStringContainsString('break-after: avoid-page !important;', $styles);
+    }
+
     /**
      * Test admin can confirm a pending booking.
      */
