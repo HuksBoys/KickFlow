@@ -16,7 +16,7 @@
     </div>
 </div>
 
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="print-container max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="print-receipt bg-[#101814] rounded-xl border border-[#24362d] overflow-hidden text-[#f8fafc]">
         
         <!-- Header / Ticket Bar -->

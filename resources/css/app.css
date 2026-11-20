@@ -91,25 +91,35 @@
         margin: 12mm;
     }
 
+    html,
     body {
         background: #fff !important;
         color: #111 !important;
     }
 
-    body * {
-        visibility: hidden !important;
+    body > * {
+        display: none !important;
     }
 
-    .print-receipt,
-    .print-receipt * {
-        visibility: visible !important;
+    body > main {
+        display: block !important;
+    }
+
+    main > :not(.print-container),
+    .print-container > :not(.print-receipt) {
+        display: none !important;
+    }
+
+    .print-container {
+        display: block !important;
+        width: 100%;
+        max-width: none;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
     .print-receipt {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        max-width: none;
+        display: block !important;
         background: #fff !important;
         color: #111 !important;
         border: 0 !important;

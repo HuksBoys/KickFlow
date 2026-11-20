@@ -36,7 +36,7 @@
     </div>
 </div>
 
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+<div class="print-container max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
     <!-- Action Bar for Cashier Operations (Hidden when printing) -->
     <div class="bg-[#101814] rounded-xl border border-[#24362d] p-4 shadow-sm flex flex-wrap items-center justify-between gap-4 print:hidden">
