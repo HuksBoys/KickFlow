@@ -321,7 +321,7 @@ KickFlow/
 
 **Fitur Admin:**
 - **Manajemen Lapangan (Tambah & Kelola Lapangan):** Tambah lapangan baru dengan upload foto, penentuan tarif per jam, tipe (indoor/outdoor), fasilitas, ubah data, dan toggle status aktif/nonaktif.
-- **Item Tambahan Booking:** Tambah dan edit item seperti rompi tim atau air minum, atur harga per item, serta aktifkan/nonaktifkan ketersediaannya pada formulir booking customer.
+- **Item Tambahan Booking:** Tambah, edit, dan hapus item tanpa riwayat booking seperti rompi tim atau air minum. Item yang sudah tercatat pada booking hanya dapat dinonaktifkan agar struk lama tetap valid.
 - **Kasir & Konfirmasi Pesanan (Point of Sale):** Antrean kasir terpadu untuk memverifikasi pesanan pending, konfirmasi reservasi, terima pembayaran lunas, penyelesaian booking, pembatalan jadwal, filter multi-status, serta cetak struk nota resmi.
 - **Statistik & Monitoring:** Pantau booking hari ini, estimasi pendapatan bulanan, pesanan yang perlu tindakan cepat, dan 10 aktivitas transaksi terbaru.
 
@@ -394,6 +394,8 @@ KickFlow/
 | 2026-11-13 / v0.9.9 | [Lead-Agent] | QRIS Midtrans dan Bayar di Tempat | Menambahkan pilihan QRIS Midtrans dan Bayar di Tempat. QRIS membuat QR transaksi dan booking baru terkonfirmasi otomatis hanya setelah webhook Midtrans tervalidasi; cash tetap menunggu kasir | `app/Services/MidtransQrisService.php`, `app/Http/Controllers/PaymentCallbackController.php`, `app/Http/Controllers/BookingController.php`, `database/migrations/2026_11_13_083214_add_payment_details_to_bookings_table.php`, `resources/views/bookings/*`, `tests/Feature/MidtransQrisPaymentTest.php`, `README.md` |
 | 2026-11-13 / v0.9.10 | [Lead-Agent] | URL Form HTTPS Vercel | Memaksa URL Laravel memakai HTTPS pada production agar action formulir tidak dibuat sebagai `http://` ketika runtime serverless berada di belakang proxy Vercel | `app/Providers/AppServiceProvider.php`, `tests/Feature/SecureUrlGenerationTest.php`, `README.md` |
 | 2026-11-20 / v0.9.11 | [Lead-Agent] | Item Tambahan Booking | Customer dapat memilih jumlah item tambahan aktif seperti rompi tim dan air minum. Harga dicatat pada booking, ikut masuk ke QRIS/cash dan tampil pada tiket serta kasir. Admin dapat menambah atau mengedit nama, harga, dan status item. | `app/Models/Addon.php`, `app/Http/Controllers/Admin/AddonController.php`, `app/Http/Controllers/BookingController.php`, `database/migrations/2026_11_20_*_addons*.php`, `resources/views/admin/addons/*`, `resources/views/bookings/*`, `tests/Feature/AdminAddonManagementTest.php`, `README.md` |
+| 2026-11-20 / v0.9.12 | [Lead-Agent] | Cetak Struk | Mode cetak browser kini menyembunyikan layout aplikasi dan hanya menampilkan kartu struk/tiket booking, baik dari kasir maupun halaman customer. | `resources/css/app.css`, `resources/views/admin/cashier/show.blade.php`, `resources/views/bookings/show.blade.php`, `tests/Feature/*`, `README.md` |
+| 2026-11-20 / v0.9.13 | [Lead-Agent] | Hapus Item Tambahan | Admin dapat menghapus item tambahan yang belum dipakai booking. Item dengan riwayat booking ditahan agar rincian dan harga pada struk lama tetap utuh; gunakan status nonaktif untuk menghentikan penjualan item tersebut. | `app/Http/Controllers/Admin/AddonController.php`, `routes/web.php`, `resources/views/admin/addons/index.blade.php`, `tests/Feature/AdminAddonManagementTest.php`, `README.md` |
 
 ---
 

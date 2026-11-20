@@ -45,6 +45,25 @@ class AdminAddonManagementTest extends TestCase
         $this->actingAs($customer)->get('/admin/addons')->assertForbidden();
     }
 
+    public function test_admin_can_delete_unused_addon_but_not_booking_history(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $unusedAddon = Addon::factory()->create();
+        $usedAddon = Addon::factory()->create();
+        $booking = Booking::factory()->create();
+        $booking->addons()->attach($usedAddon, ['quantity' => 1, 'unit_price' => $usedAddon->price]);
+
+        $this->actingAs($admin)->delete("/admin/addons/{$unusedAddon->id}")
+            ->assertRedirect('/admin/addons')
+            ->assertSessionHas('success');
+        $this->assertModelMissing($unusedAddon);
+
+        $this->actingAs($admin)->delete("/admin/addons/{$usedAddon->id}")
+            ->assertRedirect('/admin/addons')
+            ->assertSessionHas('error');
+        $this->assertModelExists($usedAddon);
+    }
+
     public function test_customer_booking_includes_selected_active_addons_in_total(): void
     {
         $customer = User::factory()->create();

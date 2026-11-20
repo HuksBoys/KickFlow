@@ -17,7 +17,7 @@
 </div>
 
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="bg-[#101814] rounded-xl border border-[#24362d] overflow-hidden text-[#f8fafc]">
+    <div class="print-receipt bg-[#101814] rounded-xl border border-[#24362d] overflow-hidden text-[#f8fafc]">
         
         <!-- Header / Ticket Bar -->
         <div class="bg-[#0b110e] border-b border-[#1b2922] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">

@@ -54,7 +54,7 @@ Route::middleware('auth')->group(function () {
 
 // Admin routes (auth + admin role)
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('addons', AddonController::class)->except(['show', 'destroy']);
+    Route::resource('addons', AddonController::class)->except('show');
 
     // Field Management (Tambah Lapangan)
     Route::get('/fields', [AdminFieldController::class, 'index'])->name('fields.index');

@@ -74,6 +74,7 @@ class AdminCashierTest extends TestCase
         $code = '#KF-'.str_pad($booking->id, 5, '0', STR_PAD_LEFT);
         $response->assertSee($code);
         $response->assertSee('Struk Resmi Pemesanan Lapangan');
+        $response->assertSee('print-receipt', false);
     }
 
     /**

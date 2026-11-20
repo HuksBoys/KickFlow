@@ -129,7 +129,7 @@
     </div>
 
     <!-- Printable Receipt Card -->
-    <div class="bg-[#101814] rounded-xl border border-[#24362d] overflow-hidden text-[#f8fafc]">
+    <div class="print-receipt bg-[#101814] rounded-xl border border-[#24362d] overflow-hidden text-[#f8fafc]">
         <!-- Receipt Header -->
         <div class="p-6 border-b border-[#1b2922] bg-[#0b110e] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex items-center gap-3">

@@ -276,6 +276,7 @@ class KickFlowBookingAndChatTest extends TestCase
         $response = $this->actingAs($user)->get("/bookings/{$booking->id}");
         $response->assertStatus(200);
         $response->assertSee('Lapangan Hebat');
+        $response->assertSee('print-receipt', false);
     }
 
     /**

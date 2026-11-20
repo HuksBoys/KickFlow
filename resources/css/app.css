@@ -85,3 +85,35 @@
 .radar-ring {
     animation: radar-pulse 2.5s infinite ease-in-out;
 }
+
+@media print {
+    @page {
+        margin: 12mm;
+    }
+
+    body {
+        background: #fff !important;
+        color: #111 !important;
+    }
+
+    body * {
+        visibility: hidden !important;
+    }
+
+    .print-receipt,
+    .print-receipt * {
+        visibility: visible !important;
+    }
+
+    .print-receipt {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        max-width: none;
+        background: #fff !important;
+        color: #111 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+    }
+}

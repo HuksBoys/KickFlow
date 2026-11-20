@@ -45,4 +45,16 @@ class AddonController extends Controller
 
         return redirect()->route('admin.addons.index')->with('success', 'Item tambahan berhasil diperbarui.');
     }
+
+    public function destroy(Addon $addon): RedirectResponse
+    {
+        if ($addon->bookings()->exists()) {
+            return redirect()->route('admin.addons.index')
+                ->with('error', 'Item sudah tercatat pada booking dan tidak dapat dihapus. Nonaktifkan item ini sebagai gantinya.');
+        }
+
+        $addon->delete();
+
+        return redirect()->route('admin.addons.index')->with('success', 'Item tambahan berhasil dihapus.');
+    }
 }

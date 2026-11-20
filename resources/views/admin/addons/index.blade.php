@@ -36,7 +36,16 @@
                         <td class="px-5 py-4">
                             <span class="px-2.5 py-1 rounded-md text-[10px] font-mono font-bold {{ $addon->is_active ? 'bg-[#10b981]/15 text-[#34d399] border border-[#10b981]/30' : 'bg-[#ef4444]/15 text-[#fca5a5] border border-[#ef4444]/30' }}">{{ $addon->is_active ? 'Aktif' : 'Non-aktif' }}</span>
                         </td>
-                        <td class="px-5 py-4 text-right"><a href="{{ route('admin.addons.edit', $addon) }}" class="px-3 py-1.5 rounded-lg bg-[#15201a] hover:bg-[#1b2922] border border-[#24362d] text-[#38bdf8] text-xs font-medium transition-colors">Edit</a></td>
+                        <td class="px-5 py-4 text-right">
+                            <div class="flex justify-end gap-2">
+                                <a href="{{ route('admin.addons.edit', $addon) }}" class="px-3 py-1.5 rounded-lg bg-[#15201a] hover:bg-[#1b2922] border border-[#24362d] text-[#38bdf8] text-xs font-medium transition-colors">Edit</a>
+                                <form method="POST" action="{{ route('admin.addons.destroy', $addon) }}" onsubmit="return confirm('Hapus item {{ $addon->name }}?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="px-3 py-1.5 rounded-lg border border-[#ef4444]/40 hover:bg-[#ef4444]/10 text-[#ef4444] text-xs font-medium transition-colors">Hapus</button>
+                                </form>
+                            </div>
+                        </td>
                     </tr>
                 @empty
                     <tr><td colspan="4" class="px-5 py-10 text-center text-[#64748b]">Belum ada item tambahan. Tambahkan rompi, minuman, atau kebutuhan lain.</td></tr>
